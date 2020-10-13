@@ -35,7 +35,7 @@ class FCC(torch.nn.Module):
 
         # log all the features
         # add small error to mak 0-kl distances not a NaN
-        X = kl_loss + (1e*-5)
+        X = kl_loss + (1e-5)
         feats = torch.log(X)
 
         # Apply mask to get -1 features in correct place (i.e. where no phones observed)
