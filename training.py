@@ -1,5 +1,9 @@
 import torch
 import numpy
+from torch.utils.data import TensorDataset
+from torch.utils.data import DataLoader
+from models import FCC
+import pickle
 
 
 def get_phones(alphabet='arpabet'):
@@ -68,8 +72,7 @@ def get_pdf(obj, phones):
 
                 k += 1
 
-    return p_means, p_covariances, q_means, q_covariances
-
+    return p_means, p_covariances, q_means, q_covariances, num_phones_mask
 
 
 pkl_file = '/home/alta/BLTSpeaking/exp-vr313/data/mfcc13/GKTS4-D3/grader/BLXXXgrd02/BLXXXgrd02.pkl'
@@ -81,7 +84,7 @@ print("loaded pkl")
 phones = get_phones()
 
 # get the means and covariances split into p and q groups (for doing kl)
-p_means, p_covariances, q_means, q_covariances = get_pdf(pkl, phones)
+p_means, p_covariances, q_means, q_covariances, mask = get_pdf(pkl, phones)
 
 print("got means and covs")
 
@@ -90,3 +93,76 @@ p_means = torch.from_numpy(p_means)
 p_covariances = torch.from_numpy(p_covariances)
 q_means = torch.from_numpy(q_means)
 q_covariances = torch.from_numpy(q_covariances)
+mask = torch.from_numpy(mask)
+
+
+# Define constants
+lr = 3*1e-2
+epochs = 400
+bs = 20
+seed = 1
+torch.manual_seed(seed)
+
+# Construct the output scores tensor
+y = (pkl['score'])
+y = torch.FloatTensor(y)
+
+# Split into training and dev sets
+num_dev = 100
+
+p_means_dev = p_means[:num_dev]
+q_means_dev = q_means[:num_dev]
+p_covariances_dev = p_covariances[:num_dev]
+q_covariances_dev = p_covariances[:num_dev]
+mask_dev = mask[:num_dev]
+y_dev = y[:num_dev]
+
+p_means_train = p_means[num_dev:]
+q_means_train = q_means[num_dev:]
+p_covariances_train = p_covariances[num_dev:]
+q_covariances_train = p_covariances[num_dev:]
+mask_train = mask[num_dev:]
+y_train = y[num_dev:]
+
+# Store all training dataset in a single wrapped tensor
+train_ds = TensorDataset(p_means_train, p_covariances_train, q_means_train, q_covariances_train, mask_train, y_train)
+
+# Use DataLoader to handle minibatches easily
+train_dl = DataLoader(train_ds, batch_size = bs, shuffle = True)
+
+model = FCC(num_features)
+print("model initialised")
+
+criterion = torch.nn.MSELoss(reduction = 'mean')
+optimizer = torch.optim.SGD(model.parameters(), lr=lr)
+#optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
+
+# Define a scheduler for an adaptive learning rate
+lambda1 = lambda epoch: 0.999**epoch
+scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda = lambda1)
+
+for epoch in range(epochs):
+    model.train()
+    for pm, pc, qm, qc, m, yb in train_dl:
+
+        # Forward pass
+        y_pred = model(pm, pc, qm, qc, m)
+
+        # Compute loss
+        loss = criterion(y_pred, yb)
+
+        # Zero gradients, backward pass, update weights
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+    print(loss.item())
+    model.eval()
+    # Evaluate on dev set
+    y_pr = model(X_dev)
+    y_pr[y_pr>6]=6
+    y_pr[y_pr<0]=0
+    #dev_loss = calculate_mse(y_pr.tolist(), y_dev.tolist())
+    #print(epoch, dev_loss)
+
+    scheduler.step()
