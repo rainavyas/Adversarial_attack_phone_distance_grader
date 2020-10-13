@@ -61,6 +61,7 @@ train_dl = DataLoader(train_ds, batch_size = bs, shuffle = True)
 
 num_features = 1128
 model = FCC(num_features)
+model = model.float()
 print("model initialised")
 
 criterion = torch.nn.MSELoss(reduction = 'mean')
