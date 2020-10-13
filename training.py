@@ -56,6 +56,7 @@ train_ds = TensorDataset(p_means_train, p_covariances_train, q_means_train, q_co
 # Use DataLoader to handle minibatches easily
 train_dl = DataLoader(train_ds, batch_size = bs, shuffle = True)
 
+num_features = 1128
 model = FCC(num_features)
 print("model initialised")
 

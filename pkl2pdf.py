@@ -77,7 +77,6 @@ print("loaded pkl")
 
 # get the phones
 phones = get_phones()
-num_features = int((len(phones)-1)(len(phones)-2)*0.5)
 
 # get the means and covariances split into p and q groups (for doing kl)
 p_means, p_covariances, q_means, q_covariances, mask = get_pdf(pkl, phones)
