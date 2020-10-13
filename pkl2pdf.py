@@ -70,7 +70,8 @@ def get_pdf(obj, phones):
     return p_means, p_covariances, q_means, q_covariances, num_phones_mask
 
 
-pkl_file = '/home/alta/BLTSpeaking/exp-vr313/data/mfcc13/GKTS4-D3/grader/BLXXXgrd02/BLXXXgrd02.pkl'
+#pkl_file = '/home/alta/BLTSpeaking/exp-vr313/data/mfcc13/GKTS4-D3/grader/BLXXXgrd02/BLXXXgrd02.pkl'
+pkl_file = '/home/alta/BLTSpeaking/exp-vr313/data/mfcc13/GKTS4-D3/grader/BLXXXeval3/BLXXXeval3.pkl'
 pkl = pickle.load(open(pkl_file, "rb"))
 
 print("loaded pkl")
@@ -86,5 +87,6 @@ y = (pkl['score'])
 y = np.array(y)
 
 # write to output file
-output_file = 'BLXXXgrd02_means_covs.npz'
+#output_file = 'BLXXXgrd02_means_covs.npz'
+output_file = 'BLXXXeval3_means_covs.npz'
 np.savez(output_file, p_means, p_covariances, q_means, q_covariances, mask, y)
