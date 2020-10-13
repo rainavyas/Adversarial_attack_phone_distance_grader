@@ -24,3 +24,11 @@ The aim is to add a small universal noise to the audio waveforms, such that the 
 ### pip install torch==1.4.0 torchvision==0.5.0 -f https://download.pytorch.org/whl/cu100/torch_stable.html -> using CUDA 10.0
 
 These dependencies cover all the requirements to run all the scripts in this repository.
+
+# File Descriptions
+
+## pkl2pdf.py
+
+* Loads the input data from a pickle file - mfcc vectors (indexed by frame, phone, word, utterance, speaker) for Linguaskill-General Data
+* Computes a Gaussian distribution (mean and covariance) by speaker for each of the 47 phones
+* Writes numpy arrays to npz file
