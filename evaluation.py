@@ -37,6 +37,8 @@ y_pred[y_pred>6]=6.0
 y_pred[y_pred<0]=0.0
 y_pred_list = y_pred.tolist()
 
+y_list = y.tolist()
+
 mse = calculate_mse(y_pred_list, y_list)
 pcc = calculate_pcc(y_pred, y)
 less1 = calculate_less1(y_pred, y)
