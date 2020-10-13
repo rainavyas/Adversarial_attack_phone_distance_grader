@@ -27,19 +27,15 @@ class FCC(torch.nn.Module):
         '''
 
         # compute symmetric kl-divergences between every phone distribution per speaker
-        p = torch.distributions.MultivariateNormal(p_means, p_covariances).sample()
-        q = torch.distributions.MultivariateNormal(q_means, q_covariances).sample()
+        p = torch.distributions.MultivariateNormal(p_means, p_covariances)
+        q = torch.distributions.MultivariateNormal(q_means, q_covariances)
+
         kl_loss = ((torch.distributions.kl_divergence(p, q) + torch.distributions.kl_divergence(q, p))*0.5)
-
-        print("kl type", kl_loss.type())
-
-        print("kl loss size", kl_loss.size())
 
         # log all the features
         # add small error to mak 0-kl distances not a NaN
         X = kl_loss + (1e-5)
         feats = torch.log(X)
-
 
         # Apply mask to get -1 features in correct place (i.e. where no phones observed)
         feats_shifted = feats + 1

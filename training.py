@@ -18,12 +18,12 @@ y = npzfile['arr_5']
 print("got means and covs")
 
 # convert to tensors
-p_means = torch.from_numpy(p_means)
-p_covariances = torch.from_numpy(p_covariances)
-q_means = torch.from_numpy(q_means)
-q_covariances = torch.from_numpy(q_covariances)
-mask = torch.from_numpy(mask)
-y = torch.from_numpy(y)
+p_means = torch.from_numpy(p_means).float()
+p_covariances = torch.from_numpy(p_covariances).float()
+q_means = torch.from_numpy(q_means).float()
+q_covariances = torch.from_numpy(q_covariances).float()
+mask = torch.from_numpy(mask).float()
+y = torch.from_numpy(y).float()
 
 # add small noise to all covariance matrices to ensure they are non-singular
 p_covariances = p_covariances + (1e-4*torch.eye(13))
@@ -32,7 +32,7 @@ q_covariances = q_covariances + (1e-4*torch.eye(13))
 # Define constants
 lr = 3*1e-2
 epochs = 400
-bs = 20
+bs = 450
 seed = 1
 torch.manual_seed(seed)
 
