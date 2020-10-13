@@ -49,7 +49,7 @@ These dependencies cover all the requirements to run all the scripts in this rep
 
 ## models.py
 
-*Torch model class definition
+* Torch model class definition
   * symmetric kl-divergence between every phone distribution computed
   * Mask applied to ensure that kl-div features corresponding to zero phone observations are set to "-1" (as suggested in paper)
   * Batch normalise
