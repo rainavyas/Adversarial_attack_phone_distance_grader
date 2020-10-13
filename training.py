@@ -25,6 +25,9 @@ q_covariances = torch.from_numpy(q_covariances)
 mask = torch.from_numpy(mask)
 y = torch.from_numpy(y)
 
+# add small noise to all covariance matrices to ensure they are non-singular
+p_covariances = p_covariances + torch.eye(13)
+q_covariances = q_covariances + torch.eye(13)
 
 # Define constants
 lr = 3*1e-2
