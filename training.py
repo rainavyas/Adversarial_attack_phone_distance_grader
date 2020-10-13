@@ -24,11 +24,11 @@ def get_pdf(obj, phones):
     n = len(obj['plp'][0][0][0][0][0]) # dimension of mfcc vector
 
     # Define the tensors required by spectral attack model
-    p_means = np.zeros((len(obj['plp']), (len(phones)-1)*(len(phones)-2)*0.5 , n))
-    p_covariances = np.zeros((len(obj['plp']), (len(phones)-1)*(len(phones)-2)*0.5, n, n))
-    q_means = np.zeros((len(obj['plp']), (len(phones)-1)*(len(phones)-2)*0.5 , n))
-    q_covariances = np.zeros((len(obj['plp']), (len(phones)-1)*(len(phones)-2)*0.5, n, n))
-    num_phones_mask = np.zeros(len(obj['plp']), (len(phones)-1)*(len(phones)-2)*0.5)
+    p_means = np.zeros((len(obj['plp']), int((len(phones)-1)*(len(phones)-2)*0.5) , n))
+    p_covariances = np.zeros((len(obj['plp']), int((len(phones)-1)*(len(phones)-2)*0.5), n, n))
+    q_means = np.zeros((len(obj['plp']), int((len(phones)-1)*(len(phones)-2)*0.5) , n))
+    q_covariances = np.zeros((len(obj['plp']), int((len(phones)-1)*(len(phones)-2)*0.5), n, n))
+    num_phones_mask = np.zeros((len(obj['plp']), int((len(phones)-1)*(len(phones)-2)*0.5)))
 
 
     for spk in range(len(obj['plp'])):
@@ -67,8 +67,8 @@ def get_pdf(obj, phones):
                     p_covariances[spk][k] = Sig[i]
                     q_covariances[spk][k] = Sig[j]
 
-                p_means[spk][k] = SX[i]
-                q_means[spk][k] = SX[j]
+                p_means[spk][k] = SX[i].squeeze()
+                q_means[spk][k] = SX[j].squeeze()
 
                 k += 1
 
@@ -82,6 +82,7 @@ print("loaded pkl")
 
 # get the phones
 phones = get_phones()
+num_features = int((len(phones)-1)(len(phones)-2)*0.5)
 
 # get the means and covariances split into p and q groups (for doing kl)
 p_means, p_covariances, q_means, q_covariances, mask = get_pdf(pkl, phones)
