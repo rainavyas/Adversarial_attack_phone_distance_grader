@@ -32,7 +32,7 @@ model = torch.load(model_path)
 model.eval()
 
 # get predictions
-y_pred = model(p_means_dev, p_covariances_dev, q_means_dev, q_covariances_dev, mask_dev)
+y_pred = model(p_means, p_covariances, q_means, q_covariances, mask)
 y_pred[y_pred>6]=6.0
 y_pred[y_pred<0]=0.0
 y_pred_list = y_pred.tolist()
