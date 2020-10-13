@@ -3,6 +3,7 @@ import pickle
 from utility import *
 import math
 import numpy as np
+from models import FCC
 
 model_path = "FCC_lpron_seed1.pt"
 input_file = 'BLXXXeval3_means_covs.npz'
