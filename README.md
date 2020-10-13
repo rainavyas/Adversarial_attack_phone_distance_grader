@@ -31,4 +31,26 @@ These dependencies cover all the requirements to run all the scripts in this rep
 
 * Loads the input data from a pickle file - mfcc vectors (indexed by frame, phone, word, utterance, speaker) for Linguaskill-General Data
 * Computes a Gaussian distribution (mean and covariance) by speaker for each of the 47 phones
+* Create two sets of arrays: p and q (for means and covariances separately). Structured such that torch.distributions.kl can be used to perform kl divergence computations between every pair of distributions per speaker (i.e. num_phones x (num_phones -1)x0.5 kl div computations)
 * Writes numpy arrays to npz file
+
+## training.py
+
+* Loads the numpy data (output of **pkl2pdf.py**)
+* Adds small noise to covariances (to make them non-singular)
+* Converts to pytorch tensors and splits into training and dev set
+* Training and saving trained model, using model class defined in **models.py**
+
+## evaluation.py
+
+* Load equivalent evaluation data numpy arrays from output of **pkl2pdf.py**
+* Pass through trained torch model from **models.py**
+* Compute mse, pcc, percentage within half and one grade prediction
+
+## models.py
+
+*Torch model class definition
+  * symmetric kl-divergence between every phone distribution computed
+  * Mask applied to ensure that kl-div features corresponding to zero phone observations are set to "-1" (as suggested in paper)
+  * Batch normalise
+  * Pass through 8-layer fully connected network with ReLU activation and dropout with 0.5 probability on first and third layers
