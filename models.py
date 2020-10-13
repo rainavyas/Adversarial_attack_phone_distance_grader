@@ -42,8 +42,6 @@ class FCC(torch.nn.Module):
         feats_masked = feats_shifted * num_phones_mask
         feats_correct = feats_masked - 1
 
-        print(feats_correct.type())
-
         # pass through layers
 
         # Normalize each input vector

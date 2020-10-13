@@ -91,7 +91,7 @@ for epoch in range(epochs):
     print(loss.item())
     model.eval()
     # Evaluate on dev set
-    y_pr = model(X_dev)
+    y_pr = model(p_means_dev, p_covariances_dev, q_means_dev, q_covariances_dev, mask_dev)
     y_pr[y_pr>6]=6
     y_pr[y_pr<0]=0
     dev_loss = calculate_mse(y_pr.tolist(), y_dev.tolist())
