@@ -3,6 +3,7 @@ from torch.utils.data import TensorDataset
 from torch.utils.data import DataLoader
 from models import FCC
 import numpy as np
+from utility import calculate_mse
 
 
 # Load the means and covariances
@@ -93,7 +94,7 @@ for epoch in range(epochs):
     y_pr = model(X_dev)
     y_pr[y_pr>6]=6
     y_pr[y_pr<0]=0
-    #dev_loss = calculate_mse(y_pr.tolist(), y_dev.tolist())
-    #print(epoch, dev_loss)
+    dev_loss = calculate_mse(y_pr.tolist(), y_dev.tolist())
+    print(epoch, dev_loss)
 
     scheduler.step()
