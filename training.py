@@ -43,14 +43,14 @@ num_dev = 100
 p_means_dev = p_means[:num_dev]
 q_means_dev = q_means[:num_dev]
 p_covariances_dev = p_covariances[:num_dev]
-q_covariances_dev = p_covariances[:num_dev]
+q_covariances_dev = q_covariances[:num_dev]
 mask_dev = mask[:num_dev]
 y_dev = y[:num_dev]
 
 p_means_train = p_means[num_dev:]
 q_means_train = q_means[num_dev:]
 p_covariances_train = p_covariances[num_dev:]
-q_covariances_train = p_covariances[num_dev:]
+q_covariances_train = q_covariances[num_dev:]
 mask_train = mask[num_dev:]
 y_train = y[num_dev:]
 
@@ -100,5 +100,5 @@ for epoch in range(epochs):
     scheduler.step()
 
 # save the model
-output_file = "test_FCC_lpron_seed"+str(seed)+".pt"
+output_file = "FCC_lpron_seed"+str(seed)+".pt"
 torch.save(model, output_file)
