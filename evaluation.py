@@ -4,7 +4,7 @@ import numpy as np
 from models import FCC
 
 model_path = "FCC_lpron_seed1.pt"
-input_file = 'BLXXXgrd02_means_covs.npz'
+input_file = 'BLXXXeval3_means_covs.npz'
 npzfile = np.load(input_file)
 p_means = npzfile['arr_0']
 p_covariances = npzfile['arr_1']
@@ -36,9 +36,6 @@ y_pred[y_pred<0]=0.0
 y_pred_list = y_pred.tolist()
 
 y_list = y.tolist()
-
-print(y_pred_list)
-print(y_list)
 
 mse = calculate_mse(y_pred_list, y_list)
 pcc = calculate_pcc(y_pred, y)
