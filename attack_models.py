@@ -1,69 +1,6 @@
 import torch
+import torch_dct as dct
 from models import FCC
-
-
-# class Spectral_attack(torch.nn.Module):
-#     def __init__(self, spectral_dim, mfcc_dim, trained_model_path):
-#
-#         super(Spectral_attack, self).__init__()
-#         self.trained_model = torch.load(trained_model_path)
-#         self.trained_model.eval()
-#
-#         self.noise_root = torch.nn.Parameter(torch.randn(spectral_dim))
-#         self.noise = torch.exp(self.noise_root)
-#
-#         self.spectral_dim = spectral_dim
-#         self.mfcc_dim = mfcc_dim
-#
-#     def kl_div(self, mu1, mu2, sig1, sig2):
-#         '''
-#         return symmetric kl-div between two Gaussian pdfs
-#         '''
-#
-#         s0 = sig1+1e-3 * torch.eye(self.mfcc_dim)
-#         s1 = sig2+1e-3 * torch.eye(self.mfcc_dim)
-#         s1m =
-#
-#     def get_features(self, means_by_phone, covs_by_phone):
-#
-#
-#
-#     def forward(self, means, covariances, num_phones_mask):
-#         '''
-#         means = [num_speakers * num_phones * mfcc_dim]
-#         covariances = [num_speakers * num_phones * mfcc_dim * mfcc_dim]
-#         num_phones_mask = [num_speakers * (mfcc_dim x mfcc_dim)],
-#         with a 0 corresponding to positiion that should be -1 (no phones observed)
-#         and a 1 everywhere else.
-#         '''
-#
-#         p = torch.distributions.MultivariateNormal(means, covariances)
-#
-#
-#
-#
-#         # Make all features that should be -1, -1 using mask
-#         feats_shifted = feats + 1
-#         feats_masked = feats_shifted * num_phones_mask
-#         feats_correct = feats_masked - 1
-#
-#         # Pass through trained model
-#         y = self.trained_model(feats_correct)
-#
-#         return y
-#
-#     def get_preds_no_noise(self, means, covariances):
-#         '''
-#         return the grade predictions with no adversarial attack
-#         '''
-#
-#     def get_noise(self):
-#         '''
-#         return the spectral noise vector
-#         '''
-#         return self.noise
-
-
 
 class Spectral_attack(torch.nn.Module):
     def __init__(self, spectral_dim, mfcc_dim, trained_model_path):
@@ -86,21 +23,41 @@ class Spectral_attack(torch.nn.Module):
         num_phones_mask = [num_speakers X num_feats],
         with a 0 corresponding to positiion that should be -1 (no phones observed)
         and a 1 everywhere else.
-        n.b. num_feats = 46*47*0.5 = 1128 usually
+        n.b. num_feats = 46*47*0.5 = 1128 usually, where 47 = num_phones
         '''
 
-        p = torch.distributions.MultivariateNormal(means, covariances)
-        
+        # Need to add spectral noise
+        # Pad to spectral dimension
+        padding = torch.zeros(p_means.size(0), p_means.size(1), self.spectral_dim - self.mfcc_dim)
+        padded_p_means = torch.cat((p_means, padding), 2)
+        padded_q_means = torch.cat((q_means, padding), 2)
 
+        # Apply inverse dct
+        log_spectral_p = dct.idct(padded_p_means)
+        log_spectral_q = dct.idct(padded_q_means)
 
+        # Apply inverse log
+        spectral_p = torch.log(log_spectral_p)
+        spectral_q = torch.log(log_spectral_q)
 
-        # Make all features that should be -1, -1 using mask
-        feats_shifted = feats + 1
-        feats_masked = feats_shifted * num_phones_mask
-        feats_correct = feats_masked - 1
+        # Add the adversarial attack noise
+        attacked_spectral_p = spectral_p + self.noise
+        attacked_spectral_q = spectral_q + self.noise
+
+        # Apply the log
+        attacked_log_spectral_p = torch.log(attacked_spectral_p)
+        attacked_log_spectral_q = torch.log(attacked_spectral_q)
+
+        # Apply the dct
+        attacked_padded_p = dct.dct(attacked_log_spectral_p)
+        attacked_padded_q = dct.dct(attacked_log_spectral_q)
+
+        # Truncate to mfcc dimension
+        p_means_attacked = torch.narrow(2, 0, self.mfcc_dim)
+        q_means_attacked = torch.narrow(2, 0, self.mfcc_dim)
 
         # Pass through trained model
-        y = self.trained_model(feats_correct)
+        y = self.trained_model(p_means_attacked, p_covariances, q_means_attacked, q_covariances, num_phones_mask)
 
         return y
 
