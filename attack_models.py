@@ -37,8 +37,8 @@ class Spectral_attack(torch.nn.Module):
         log_spectral_q = dct.idct(padded_q_means)
 
         # Apply inverse log
-        spectral_p = torch.log(log_spectral_p)
-        spectral_q = torch.log(log_spectral_q)
+        spectral_p = torch.exp(log_spectral_p)
+        spectral_q = torch.exp(log_spectral_q)
 
         # Add the adversarial attack noise
         attacked_spectral_p = spectral_p + self.noise
@@ -61,10 +61,11 @@ class Spectral_attack(torch.nn.Module):
 
         return y
 
-    def get_preds_no_noise(self, means, covariances):
+    def get_preds_no_noise(self, p_means, p_covariances, q_means, q_covariances, num_phones_mask):
         '''
         return the grade predictions with no adversarial attack
         '''
+        return self.trained_model(p_means, p_covariances, q_means, q_covariances, num_phones_mask)
 
     def get_noise(self):
         '''
