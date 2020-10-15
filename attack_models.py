@@ -53,8 +53,8 @@ class Spectral_attack(torch.nn.Module):
         attacked_padded_q = dct.dct(attacked_log_spectral_q)
 
         # Truncate to mfcc dimension
-        p_means_attacked = torch.narrow(2, 0, self.mfcc_dim)
-        q_means_attacked = torch.narrow(2, 0, self.mfcc_dim)
+        p_means_attacked = torch.narrow(attacked_padded_p, 2, 0, self.mfcc_dim)
+        q_means_attacked = torch.narrow(attacked_padded_q, 2, 0, self.mfcc_dim)
 
         # Pass through trained model
         y = self.trained_model(p_means_attacked, p_covariances, q_means_attacked, q_covariances, num_phones_mask)

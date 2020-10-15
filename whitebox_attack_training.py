@@ -49,10 +49,10 @@ train_dl = DataLoader(train_ds, batch_size = bs, shuffle = True)
 attack_model = Spectral_attack(spectral_dim, mfcc_dim, trained_model_path)
 print("model initialised")
 
-optimizer = torch.optim.SGD(model.parameters(), lr=lr)
+optimizer = torch.optim.SGD(attack_model.parameters(), lr=lr)
 
 for epoch in range(epochs):
-    model.train()
+    attack_model.train()
     for pm, pc, qm, qc, m in train_dl:
 
         # Forward pass
