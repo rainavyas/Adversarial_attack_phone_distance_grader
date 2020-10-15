@@ -64,7 +64,7 @@ for epoch in range(epochs):
 
         # Zero gradients, backward pass, update weights
         optimizer.zero_grad()
-        loss.backward(retain_graph=TRUE)
+        loss.backward(retain_graph=True)
         optimizer.step()
 
     # Check average grade prediction
