@@ -54,30 +54,23 @@ optimizer = torch.optim.SGD(attack_model.parameters(), lr=lr)
 for epoch in range(epochs):
     attack_model.train()
 
-    y_pred = attack_model(p_means, p_covariances, q_means, q_covariances, mask)
-    loss = -1*torch.sum(y_pred)
-    optimizer.zero_grad()
-    print("backwarding")
-    loss.backward()
-    optimizer.step()
-    
-
-#    for pm, pc, qm, qc, m in train_dl:
+    for pm, pc, qm, qc, m in train_dl:
 
         # Forward pass
-#        y_pred = attack_model(pm, pc, qm, qc, m)
+        y_pred = attack_model(pm, pc, qm, qc, m)
 
         # Compute loss
-#        loss = -1*torch.sum(y_pred)
+        loss = -1*torch.sum(y_pred)
 
         # Zero gradients, backward pass, update weights
-#        optimizer.zero_grad()
-#        loss.backward(retain_graph=TRUE)
-#        optimizer.step()
+        optimizer.zero_grad()
+        loss.backward(retain_graph=TRUE)
+        optimizer.step()
 
     # Check average grade prediction
     attack_model.eval()
     y_pred_no_attack = attack_model.get_preds_no_noise(p_means, p_covariances, q_means, q_covariances, mask)
+    print(y_pred_no_attack)
     no_attack_avg_grade = torch.mean(y_pred_no_attack)
     y_pred_attack = attack_model(p_means, p_covariances, q_means, q_covariances, mask)
     attack_avg_grade = torch.mean(y_pred_attack)
