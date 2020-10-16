@@ -6,8 +6,9 @@ class Spectral_attack(torch.nn.Module):
     def __init__(self, spectral_dim, mfcc_dim, trained_model_path):
 
         super(Spectral_attack, self).__init__()
-        self.trained_model = torch.load(trained_model_path)
-        self.trained_model.eval()
+        # self.trained_model = torch.load(trained_model_path)
+        # self.trained_model.eval()
+        self.trained_model_path = trained_model_path
 
         self.noise_root = torch.nn.Parameter(torch.randn(spectral_dim))
         self.noise = torch.exp(self.noise_root)
@@ -57,8 +58,9 @@ class Spectral_attack(torch.nn.Module):
         q_means_attacked = torch.narrow(attacked_padded_q, 2, 0, self.mfcc_dim)
 
         # Pass through trained model
-        self.trained_model.eval()
-        y = self.trained_model(p_means_attacked, p_covariances, q_means_attacked, q_covariances, num_phones_mask)
+        trained_model = torch.load(self.trained_model_path)
+        trained_model.eval()
+        y = trained_model(p_means_attacked, p_covariances, q_means_attacked, q_covariances, num_phones_mask)
 
         return y
 
@@ -66,7 +68,8 @@ class Spectral_attack(torch.nn.Module):
         '''
         return the grade predictions with no adversarial attack
         '''
-        self.trained_model.eval()
+        trained_model = torch.load(self.trained_model_path)
+        trained_model.eval()
         return self.trained_model(p_means, p_covariances, q_means, q_covariances, num_phones_mask)
 
     def get_noise(self):
