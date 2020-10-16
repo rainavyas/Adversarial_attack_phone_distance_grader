@@ -76,4 +76,4 @@ class Spectral_attack(torch.nn.Module):
         '''
         return the spectral noise vector
         '''
-        return self.noise
+        return torch.exp(self.noise_root)
