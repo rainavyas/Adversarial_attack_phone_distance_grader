@@ -6,12 +6,11 @@ class Spectral_attack(torch.nn.Module):
     def __init__(self, spectral_dim, mfcc_dim, trained_model_path):
 
         super(Spectral_attack, self).__init__()
-        # self.trained_model = torch.load(trained_model_path)
-        # self.trained_model.eval()
+
         self.trained_model_path = trained_model_path
 
         self.noise_root = torch.nn.Parameter(torch.randn(spectral_dim))
-        self.noise = torch.exp(self.noise_root)
+        # self.noise = torch.exp(self.noise_root)
 
         self.spectral_dim = spectral_dim
         self.mfcc_dim = mfcc_dim
@@ -26,6 +25,7 @@ class Spectral_attack(torch.nn.Module):
         and a 1 everywhere else.
         n.b. num_feats = 46*47*0.5 = 1128 usually, where 47 = num_phones
         '''
+        noise = torch.exp(self.noise_root)
 
         # Need to add spectral noise
         # Pad to spectral dimension
@@ -42,8 +42,8 @@ class Spectral_attack(torch.nn.Module):
         spectral_q = torch.exp(log_spectral_q)
 
         # Add the adversarial attack noise
-        attacked_spectral_p = spectral_p + self.noise
-        attacked_spectral_q = spectral_q + self.noise
+        attacked_spectral_p = spectral_p + noise
+        attacked_spectral_q = spectral_q + noise
 
         # Apply the log
         attacked_log_spectral_p = torch.log(attacked_spectral_p)
