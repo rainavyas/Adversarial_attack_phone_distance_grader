@@ -30,7 +30,7 @@ p_covariances = p_covariances + (1e-4*torch.eye(13))
 q_covariances = q_covariances + (1e-4*torch.eye(13))
 
 # Define constants
-lr = 3*1e-3
+lr = 3*1e-2
 epochs = 100
 bs = 50
 seed = 1
@@ -74,7 +74,6 @@ for epoch in range(epochs):
     # Check average grade prediction
     attack_model.eval()
     y_pred_no_attack = attack_model.get_preds_no_noise(p_means, p_covariances, q_means, q_covariances, mask)
-    print(y_pred_no_attack)
     no_attack_avg_grade = torch.mean(y_pred_no_attack)
     y_pred_attack = attack_model(p_means, p_covariances, q_means, q_covariances, mask)
     attack_avg_grade = torch.mean(y_pred_attack)

@@ -70,7 +70,7 @@ class Spectral_attack(torch.nn.Module):
         '''
         trained_model = torch.load(self.trained_model_path)
         trained_model.eval()
-        return self.trained_model(p_means, p_covariances, q_means, q_covariances, num_phones_mask)
+        return trained_model(p_means, p_covariances, q_means, q_covariances, num_phones_mask)
 
     def get_noise(self):
         '''
