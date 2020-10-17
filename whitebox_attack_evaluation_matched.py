@@ -36,9 +36,9 @@ no_attack_avg_grade = torch.mean(y_pred_no_attack)
 y_pred_attack = attack_model(p_means, p_covariances, q_means, q_covariances, mask)
 attack_avg_grade = torch.mean(y_pred_attack)
 
-    print("No attack average grade: ", no_attack_avg_grade)
-    print("Attacked average grade: ", attack_avg_grade)
+print("No attack average grade: ", no_attack_avg_grade)
+print("Attacked average grade: ", attack_avg_grade)
 
-    # get the noise
-    noise = attack_model.get_noise()
-    print("Spectral noise: ", noise)
+# get the noise
+noise = attack_model.get_noise()
+print("Spectral noise: ", noise)
