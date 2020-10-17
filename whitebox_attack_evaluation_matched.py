@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 from attack_models import Spectral_attack
+from utility import *
 
 # Load the means and covariances
 input_file = 'BLXXXgrd02_means_covs.npz'
@@ -42,3 +43,25 @@ print("Attacked average grade: ", attack_avg_grade)
 # get the noise
 noise = attack_model.get_noise()
 print("Spectral noise: ", noise)
+
+# Stats with no attack
+print("---------------------------------------------------------")
+print("STATS with no attack")
+y_list = y.tolist()
+mse = calculate_mse(y_pred_no_attack.tolist(), y_list)
+pcc = calculate_pcc(y_pred_no_attack, y)
+less1 = calculate_less1(y_pred_no_attack, y)
+less05 = calculate_less05(y_pred_no_attack, y)
+
+print("mse: "+ str(mse)+"\n pcc: "+str(pcc)+"\n less than 1 away: "+ str(less1)+"\n less than 0.5 away: "+str(less05))
+
+
+# Stats with attack
+print("---------------------------------------------------------")
+print("STATS with no attack")
+mse = calculate_mse(y_pred_attack.tolist(), y_list)
+pcc = calculate_pcc(y_pred_attack, y)
+less1 = calculate_less1(y_pred_attack, y)
+less05 = calculate_less05(y_pred_attack, y)
+
+print("mse: "+ str(mse)+"\n pcc: "+str(pcc)+"\n less than 1 away: "+ str(less1)+"\n less than 0.5 away: "+str(less05))
