@@ -22,8 +22,8 @@ mask = torch.from_numpy(mask).float()
 y = torch.from_numpy(y).float()
 
 # add small noise to all covariance matrices to ensure they are non-singular
-p_covariances = p_covariances + (1e-4*torch.eye(13))
-q_covariances = q_covariances + (1e-4*torch.eye(13))
+p_covariances = p_covariances + (1e-3*torch.eye(13))
+q_covariances = q_covariances + (1e-3*torch.eye(13))
 
 # Load the model
 model = torch.load(model_path)

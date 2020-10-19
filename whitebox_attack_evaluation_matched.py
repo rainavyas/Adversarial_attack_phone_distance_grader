@@ -4,7 +4,7 @@ from attack_models import Spectral_attack
 from utility import *
 
 # Load the means and covariances
-input_file = 'BLXXXgrd02_means_covs.npz'
+input_file = 'BLXXXeval3_means_covs.npz'
 npzfile = np.load(input_file)
 p_means = npzfile['arr_0']
 p_covariances = npzfile['arr_1']
@@ -24,8 +24,8 @@ mask = torch.from_numpy(mask).float()
 y = torch.from_numpy(y).float()
 
 # add small noise to all covariance matrices to ensure they are non-singular
-p_covariances = p_covariances + (1e-4*torch.eye(13))
-q_covariances = q_covariances + (1e-4*torch.eye(13))
+p_covariances = p_covariances + (1e-3*torch.eye(13))
+q_covariances = q_covariances + (1e-3*torch.eye(13))
 
 # Load the model
 attack_model_path = "attack_model_seed1.pt"
