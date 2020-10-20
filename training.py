@@ -100,5 +100,5 @@ for epoch in range(epochs):
     scheduler.step()
 
 # save the model
-output_file = "FCC_lpron_seed"+str(seed)+".pt"
+output_file = "FCC_lpron_seed"+str(seed)+"_epochs"+str(epochs)+".pt"
 torch.save(model, output_file)

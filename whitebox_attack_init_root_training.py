@@ -2,7 +2,7 @@ import torch
 from torch.utils.data import TensorDataset
 from torch.utils.data import DataLoader
 import numpy as np
-from attack_models import Spectral_attack
+from attack_models_init_root import Spectral_attack_init
 
 
 # Load the means and covariances
@@ -30,15 +30,15 @@ p_covariances = p_covariances + (1e-3*torch.eye(13))
 q_covariances = q_covariances + (1e-3*torch.eye(13))
 
 # Define constants
-lr = 3*1e-2
-epochs = 300
+lr = 3*1e-0
+epochs = 100
 bs = 50
-seed = 1
+seed = 2
 torch.manual_seed(seed)
 trained_model_path = "FCC_lpron_seed1.pt"
 spectral_dim = 24
 mfcc_dim = 13
-
+init_root = torch.FloatTensor([-3]*spectral_dim)
 
 # Store all training dataset in a single wrapped tensor
 train_ds = TensorDataset(p_means, p_covariances, q_means, q_covariances, mask)
@@ -46,7 +46,7 @@ train_ds = TensorDataset(p_means, p_covariances, q_means, q_covariances, mask)
 # Use DataLoader to handle minibatches easily
 train_dl = DataLoader(train_ds, batch_size = bs, shuffle = True)
 
-attack_model = Spectral_attack(spectral_dim, mfcc_dim, trained_model_path)
+attack_model = Spectral_attack_init(spectral_dim, mfcc_dim, trained_model_path, init_root)
 print("model initialised")
 
 optimizer = torch.optim.SGD(attack_model.parameters(), lr=lr)
@@ -87,5 +87,5 @@ for epoch in range(epochs):
 
 
 # save the model
-output_file = "attack_model_seed"+str(seed)+".pt"
+output_file = "attack_model_init_root_seed"+str(seed)+".pt"
 torch.save(attack_model, output_file)
