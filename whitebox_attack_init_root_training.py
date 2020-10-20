@@ -30,8 +30,8 @@ p_covariances = p_covariances + (1e-3*torch.eye(13))
 q_covariances = q_covariances + (1e-3*torch.eye(13))
 
 # Define constants
-lr = 3*1e-0
-epochs = 100
+lr = 3*1e-1
+epochs = 300
 bs = 50
 seed = 2
 torch.manual_seed(seed)

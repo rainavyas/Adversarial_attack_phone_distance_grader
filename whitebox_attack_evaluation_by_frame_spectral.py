@@ -4,6 +4,7 @@ import torch
 import torch_dct as dct
 from models import FCC
 from attack_models import Spectral_attack
+from utility import *
 
 def get_phones(alphabet='arpabet'):
     if alphabet == 'arpabet':
@@ -21,13 +22,13 @@ def get_phones(alphabet='arpabet'):
 
 def spectral_attack(X, attack):
     X = torch.from_numpy(X).float()
-    X.squeeze()
+    X_sq = X.squeeze()
     attack = torch.from_numpy(attack).float()
 
     # Add the attack in the spectral space
     # Pad to spectral dimension
-    padding = torch.zeros(attack.size(0) - X.size(0))
-    padded_X = torch.cat((X, padding))
+    padding = torch.zeros(attack.size(0) - X_sq.size(0))
+    padded_X = torch.cat((X_sq, padding))
 
     # Apply inverse dct
     log_spectral_X = dct.idct(padded_X)
@@ -41,7 +42,7 @@ def spectral_attack(X, attack):
     # Get back to mfcc domain
     attacked_log_spectral_X = torch.log(attacked_spectral_X)
     attacked_padded_X = dct.dct(attacked_log_spectral_X)
-    X_attacked = torch.narrow(attacked_padded_X, 0, 0, X.size(0))
+    X_attacked = torch.narrow(attacked_padded_X, 0, 0, X_sq.size(0))
     X_attacked = X_attacked.detach().numpy()
 
     return X_attacked
@@ -59,6 +60,7 @@ def get_pdf_attack(obj, phones, attack):
 
 
     for spk in range(len(obj['plp'])):
+        print("on speaker", spk)
         SX = np.zeros((len(phones) - 1, n, 1))
         N = np.zeros(len(phones) - 1)
         SX2 = np.zeros((len(phones) - 1, n, n))

@@ -28,7 +28,7 @@ p_covariances = p_covariances + (1e-3*torch.eye(13))
 q_covariances = q_covariances + (1e-3*torch.eye(13))
 
 # Load the model
-attack_model_path = "attack_model_seed2.pt"
+attack_model_path = "attack_model_init_root_seed2.pt"
 attack_model = torch.load(attack_model_path)
 attack_model.eval()
 
