@@ -42,7 +42,7 @@ def spectral_attack(X, attack):
     attacked_log_spectral_X = torch.log(attacked_spectral_X)
     attacked_padded_X = dct.dct(attacked_log_spectral_X)
     X_attacked = torch.narrow(attacked_padded_X, 0, 0, X.size(0))
-    X_attacked = X_attacked.numpy()
+    X_attacked = X_attacked.detach().numpy()
 
     return X_attacked
 
@@ -117,7 +117,7 @@ attack_model_path = "attack_model_seed1.pt"
 attack_model = torch.load(attack_model_path)
 attack_model.eval()
 attack = attack_model.get_noise()
-attack = attack.numpy()
+attack = attack.detach().numpy()
 
 
 # get the means and covariances split into p and q groups (for doing kl) with attack by frame in spectral space
