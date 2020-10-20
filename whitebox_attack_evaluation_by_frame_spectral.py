@@ -151,8 +151,29 @@ y_pred = model(p_means, p_covariances, q_means, q_covariances, mask)
 y_pred[y_pred>6]=6.0
 y_pred[y_pred<0]=0.0
 y_pred_list = y_pred.tolist()
+attack_avg_grade = torch.mean(y_pred)
 
+y_pred_no_attack = attack_model.get_preds_no_noise(p_means, p_covariances, q_means, q_covariances, mask)
+no_attack_avg_grade = torch.mean(y_pred_no_attack)
+
+# get the noise
+noise = attack_model.get_noise()
+print("Spectral noise: ", noise)
+
+# Stats with no attack
+print("---------------------------------------------------------")
+print("STATS with no attack")
 y_list = y.tolist()
+mse = calculate_mse(y_pred_no_attack.tolist(), y_list)
+pcc = calculate_pcc(y_pred_no_attack, y)
+less1 = calculate_less1(y_pred_no_attack, y)
+less05 = calculate_less05(y_pred_no_attack, y)
+
+print("mse: "+ str(mse)+"\n pcc: "+str(pcc)+"\n less than 1 away: "+ str(less1)+"\n less than 0.5 away: "+str(less05))
+
+# Stats with attack
+print("---------------------------------------------------------")
+print("STATS with no attack")
 
 mse = calculate_mse(y_pred_list, y_list)
 pcc = calculate_pcc(y_pred, y)
@@ -160,3 +181,8 @@ less1 = calculate_less1(y_pred, y)
 less05 = calculate_less05(y_pred, y)
 
 print("mse: "+ str(mse)+"\n pcc: "+str(pcc)+"\n less than 1 away: "+ str(less1)+"\n less than 0.5 away: "+str(less05))
+
+print("------------------------------------------------------------")
+
+print("No attack average grade: ", no_attack_avg_grade)
+print("Attacked average grade: ", attack_avg_grade)
