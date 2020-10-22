@@ -84,4 +84,4 @@ y = np.array(y)
 # write to output file
 output_file = 'BLXXXgrd02_pqvects.npz'
 #output_file = 'BLXXXeval3_pqvects.npz'
-np.savez(output_file, p_vects, q_vects, mask, lengths, y)
+np.savez(output_file, p_vects, q_vects,  p_lengths, q_lengths, mask, y)
