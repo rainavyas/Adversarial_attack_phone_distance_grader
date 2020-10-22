@@ -22,8 +22,8 @@ def get_vects(obj, phones, max_num_mfccs_length):
     p_vects = np.zeros((len(obj['plp']), int((len(phones)-1)*(len(phones)-2)*0.5) , max_num_mfccs_length, n))
     q_vects = np.zeros((len(obj['plp']), int((len(phones)-1)*(len(phones)-2)*0.5) , max_num_mfccs_length, n))
     num_phones_mask = np.zeros((len(obj['plp']), int((len(phones)-1)*(len(phones)-2)*0.5)))
-    p_mfcc_lengths = np.zeros((len(obj['plp']),  int((len(phones)-1)*(len(phones)-2)*0.5))
-    q_mfcc_lengths = np.zeros((len(obj['plp']),  int((len(phones)-1)*(len(phones)-2)*0.5))
+    p_mfcc_lengths = np.zeros((len(obj['plp']),  int((len(phones)-1)*(len(phones)-2)*0.5)))
+    q_mfcc_lengths = np.zeros((len(obj['plp']),  int((len(phones)-1)*(len(phones)-2)*0.5)))
 
 
     for spk in range(len(obj['plp'])):
