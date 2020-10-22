@@ -48,13 +48,16 @@ def get_vects(obj, phones, max_num_mfccs_length):
                     # define Gaussian distribution that has 0 kl div
                     # later the mask will be used to make these features "-1"
                     num_phones_mask[spk][k] = 0
+                    # Store length as 1 (in reality 0), to prevent division by 0 later on
+                    p_mfcc_lengths[spk][k] = 1
+                    q_mfcc_lengths[spk][k] = 1
                 else:
                     num_phones_mask[spk][k] = 1
+                    p_mfcc_lengths[spk][k] = N[i]
+                    q_mfcc_lengths[spk][k] = N[j]
 
                 p_vects[spk][k] = Xs[i].squeeze()
                 q_vects[spk][k] = Xs[j].squeeze()
-                p_mfcc_lengths[spk][k] = N[i]
-                q_mfcc_lengths[spk][k] = N[j]
 
                 k += 1
 
