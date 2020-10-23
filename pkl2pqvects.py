@@ -85,7 +85,8 @@ y = (pkl['score'])
 y = np.array(y)
 
 # write to output file
-output_file = 'BLXXXgrd02_pqvects.pkl'
+output_file = 'BLXXXgrd02_pqvects.npz'
 #output_file = 'BLXXXeval3_pqvects.npz'
-pkl_obj = [p_vects.tolist(), q_vects.tolist(),  p_lengths.tolist(), q_lengths.tolist(), mask.tolist(), y.tolist()]
-pickle.dump(pkl_obj, open(output_file, "wb"))
+#pkl_obj = [p_vects.tolist(), q_vects.tolist(),  p_lengths.tolist(), q_lengths.tolist(), mask.tolist(), y.tolist()]
+#pickle.dump(pkl_obj, open(output_file, "wb"))
+np.savez(output_file, p_vects, q_vects, p_lengths, q_lengths, mask, y)

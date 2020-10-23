@@ -7,14 +7,14 @@ from utility import calculate_mse
 
 
 # Load the means and covariances
-input_file = 'BLXXXgrd02_pqvects.pkl'
-pkl_obj = pickle.load(open(input_file, "rb"))
-p_vects = np.array(pkl_obj[0])
-q_vects = np.array(pkl_obj[1])
-p_lengths = np.array(pkl_obj[2])
-q_lengths = np.array(pkl_obj[3])
-mask = np.array(pkl_obj[4])
-y = np.array(pkl_obj[5])
+input_file = 'BLXXXgrd02_pqvects.npz'
+npzfile = np.load(input_file)
+p_vects = npzfile['arr_0']
+q_vects = npzfile['arr_1']
+p_lengths = npzfile['arr_2']
+q_lengths = npzfile['arr_3']
+mask = npzfile['arr_4']
+y = npzfile['arr_5']
 
 print("got means and covs")
 
