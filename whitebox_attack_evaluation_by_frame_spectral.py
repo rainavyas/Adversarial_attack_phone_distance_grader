@@ -162,7 +162,7 @@ print("Spectral noise: ", noise)
 print("---------------------------------------------------------")
 print("STATS with attack")
 
-mse = calculate_mse(y_pred_list, y_list)
+mse = calculate_mse(y_pred_list, y.tolist())
 pcc = calculate_pcc(y_pred, y)
 less1 = calculate_less1(y_pred, y)
 less05 = calculate_less05(y_pred, y)
