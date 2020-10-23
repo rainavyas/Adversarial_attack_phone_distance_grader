@@ -39,7 +39,7 @@ def get_vects(obj, phones, max_num_mfccs_length):
                         N[obj['phone'][spk][utt][w][ph]] += 1
                         X = np.array(obj['plp'][spk][utt][w][ph][frame])
                         curr_pos = N[obj['phone'][spk][utt][w][ph]] - 1
-                        curr_pos = int(curr_pos.item())			
+                        curr_pos = int(curr_pos.item())
                         Xs[obj['phone'][spk][utt][w][ph]][curr_pos] = X
 
 
@@ -85,6 +85,7 @@ y = (pkl['score'])
 y = np.array(y)
 
 # write to output file
-output_file = 'BLXXXgrd02_pqvects.npz'
+output_file = 'BLXXXgrd02_pqvects.pkl'
 #output_file = 'BLXXXeval3_pqvects.npz'
-np.savez(output_file, p_vects, q_vects,  p_lengths, q_lengths, mask, y)
+pkl_obj = [p_vects.tolist(), q_vects.tolist(),  p_lengths.tolist(), q_lengths.tolist(), mask.tolist(), y.tolist()]
+pickle.dump(pkl_obj, open(output_file, "wb"))
