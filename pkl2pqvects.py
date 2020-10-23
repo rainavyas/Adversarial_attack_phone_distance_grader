@@ -27,6 +27,7 @@ def get_vects(obj, phones, max_num_mfccs_length):
 
 
     for spk in range(len(obj['plp'])):
+        print("On speaker " + str(spk) + " of " + str(len(obj['plp'])))
         Xs = np.zeros((len(phones) - 1, max_num_mfccs_length, n))
         N = np.zeros(len(phones) - 1)
 
@@ -37,7 +38,9 @@ def get_vects(obj, phones, max_num_mfccs_length):
                     for frame in range(len(obj['plp'][spk][utt][w][ph])):
                         N[obj['phone'][spk][utt][w][ph]] += 1
                         X = np.array(obj['plp'][spk][utt][w][ph][frame])
-                        Xs[obj['phone'][spk][utt][w][ph]][N[obj['phone'][spk][utt][w][ph]] - 1] = X
+                        curr_pos = N[obj['phone'][spk][utt][w][ph]] - 1
+                        curr_pos = int(curr_pos.item())			
+                        Xs[obj['phone'][spk][utt][w][ph]][curr_pos] = X
 
 
         # Consturct every unique pairing of phones, related mfcc vectors
