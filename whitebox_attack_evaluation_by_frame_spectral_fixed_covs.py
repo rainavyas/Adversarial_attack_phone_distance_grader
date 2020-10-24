@@ -123,7 +123,7 @@ attack = attack.detach().numpy()
 
 
 # get the means and covariances split into p and q groups (for doing kl) with attack by frame in spectral space
-p_means, p_covariances, q_means, q_covariances, mask = get_pdf_attack(pkl, phones, attack)
+p_means, p_covariances_unfixed, q_means, q_covariances_unfixed, mask = get_pdf_attack(pkl, phones, attack)
 
 # We want to use "fixed" covariance matrices, so load them up:
 # Load the fixed covariances
@@ -179,3 +179,18 @@ print("mse: "+ str(mse)+"\n pcc: "+str(pcc)+"\n less than 1 away: "+ str(less1)+
 print("------------------------------------------------------------")
 
 print("Attacked average grade: ", attack_avg_grade)
+
+
+# compare the fixed and unfixed covariance matrices
+print("----------------------------------------------------")
+num_spks = 5
+phone_inds = [3, 60, 300] # recall we repeat some of the phones for the 1128 feats
+for spk in range(num_spks):
+    for feat in phone_inds:
+        print("speaker: ", spk)
+        print("feat: ", feat)
+        print("Unfixed Cov -> i.e. attacked:")
+        print(p_covariances_unfixed[spk][feat])
+        print("Fixed Cov -> i.e. not attacked:")
+        print(p_covariances_unfixed[spk][feat])
+        print("|||||||||||||||||||||||||||||||||||||||||||||||||||")
