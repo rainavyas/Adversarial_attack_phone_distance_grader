@@ -192,5 +192,5 @@ for spk in range(num_spks):
         print("Unfixed Cov -> i.e. attacked:")
         print(p_covariances_unfixed[spk][feat])
         print("Fixed Cov -> i.e. not attacked:")
-        print(p_covariances_unfixed[spk][feat])
+        print(p_covariances[spk][feat])
         print("|||||||||||||||||||||||||||||||||||||||||||||||||||")
