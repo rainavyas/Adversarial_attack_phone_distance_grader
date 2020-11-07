@@ -8,7 +8,7 @@ def barrier(barriers, noise, r):
     '''
     A barrier function that penalises parameters nearing the barrier
     '''
-    diff = barriers - parameters
+    diff = barriers - noise
     penalty = torch.log(diff)
     total_penalty = torch.sum(penalty)
     barrier_loss = -1*r*total_penalty
@@ -40,15 +40,15 @@ p_covariances = p_covariances + (1e-3*torch.eye(13))
 q_covariances = q_covariances + (1e-3*torch.eye(13))
 
 # Define constants
-lr = 3*1e-3
-epochs = 100
-bs = 50
+lr = 2*1e-1
+epochs = 200
+bs = 100
 seed = 1
 torch.manual_seed(seed)
 trained_model_path = "FCC_lpron_seed1.pt"
 spectral_dim = 24
 mfcc_dim = 13
-r = 0.1 # controls impact of barrier function
+r = 0.01 # controls impact of barrier function
 
 init_root = torch.FloatTensor([-3]*spectral_dim)
 barriers = torch.FloatTensor([0.5]*spectral_dim)

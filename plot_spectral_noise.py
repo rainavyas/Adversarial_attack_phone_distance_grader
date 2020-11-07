@@ -67,8 +67,8 @@ attack = attack_model.get_noise()
 attack = attack.detach().numpy()
 
 # Choose speaker and phone to see channel energies for
-spk = 3
-phone = 10
+spk = 723
+phone = 35
 num_channels = 24
 
 phones = get_phones()
