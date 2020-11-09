@@ -3,16 +3,30 @@ from torch.utils.data import TensorDataset
 from torch.utils.data import DataLoader
 import numpy as np
 from attack_models_init_root import Spectral_attack_init
+import math
+import argparse
 
-def barrier(barriers, noise, r):
-    '''
-    A barrier function that penalises parameters nearing the barrier
-    '''
-    diff = barriers - noise
-    penalty = torch.log(diff)
-    total_penalty = torch.sum(penalty)
-    barrier_loss = -1*r*total_penalty
-    return barrier_loss
+
+def clip_params(model, barrier_val):
+    old_params = {}
+
+    for name, params in model.named_parameters():
+        old_params[name] = params.clone()
+
+    for i, param in enumerate(old_params['noise_root']):
+        if param > math.log(barrier_val):
+            old_params['noise_root'][i] = math.log(barrier_val)
+
+    for name, params in model.named_parameters():
+        params.data.copy_(old_params[name])
+
+
+# Get command line arguments
+commandLineParser = argparse.ArgumentParser()
+commandLineParser.add_argument('--barrier_val', default=1.0 type=float, help='limit on spectral attack noise')
+
+args = commandLineParser.parse_args()
+barrier_val = args.barrier_val
 
 
 # Load the means and covariances
@@ -41,7 +55,7 @@ q_covariances = q_covariances + (1e-3*torch.eye(13))
 
 # Define constants
 lr = 5*1e-2
-epochs = 400
+epochs = 50
 bs = 100
 seed = 1
 torch.manual_seed(seed)
@@ -51,8 +65,9 @@ mfcc_dim = 13
 r = 0.1 # controls impact of barrier function
 sch = 0.985
 
-init_root = torch.FloatTensor([0]*spectral_dim)
-barriers = torch.FloatTensor([10]*spectral_dim)
+init_root = torch.FloatTensor([-1]*spectral_dim)
+barrier_val = barrier_val
+barriers = torch.FloatTensor([1]*spectral_dim)
 
 # Store all training dataset in a single wrapped tensor
 train_ds = TensorDataset(p_means, p_covariances, q_means, q_covariances, mask)
@@ -63,8 +78,8 @@ train_dl = DataLoader(train_ds, batch_size = bs, shuffle = True)
 attack_model = Spectral_attack_init(spectral_dim, mfcc_dim, trained_model_path, init_root)
 print("model initialised")
 
-#optimizer = torch.optim.SGD(attack_model.parameters(), lr=lr, momentum = 0.9, nesterov=True)
-optimizer = torch.optim.SGD(attack_model.parameters(), lr=lr)
+optimizer = torch.optim.SGD(attack_model.parameters(), lr=lr, momentum = 0.9, nesterov=True)
+#optimizer = torch.optim.SGD(attack_model.parameters(), lr=lr)
 
 # Scheduler for an adpative learning rate
 # Every step size number of epochs, lr = lr * gamma
@@ -78,14 +93,17 @@ for epoch in range(epochs):
         y_pred = attack_model(pm, pc, qm, qc, m)
 
         # Compute loss
-        loss = -1*torch.sum(y_pred) + barrier(barriers, attack_model.get_noise(), r)
+        loss = -1*torch.sum(y_pred)
 
         # Zero gradients, backward pass, update weights
         optimizer.zero_grad()
         loss.backward(retain_graph=True)
         optimizer.step()
 
-    print("loss and regularisation value: ", loss.item())
+        # Keep weights below barrier
+        clip_params(attack_model, barrier_val)
+
+    print("loss: ", loss.item())
     # Check average grade prediction
     attack_model.eval()
     y_pred_no_attack = attack_model.get_preds_no_noise(p_means, p_covariances, q_means, q_covariances, mask)
@@ -104,5 +122,5 @@ for epoch in range(epochs):
     scheduler.step()
 
 # save the model
-output_file = "attack_model_init_root_constrained_seed"+str(seed)+".pt"
+output_file = "attack_model_init_root_constrained"+str(barrier_val)+"_seed"+str(seed)+".pt"
 torch.save(attack_model, output_file)

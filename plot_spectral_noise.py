@@ -102,7 +102,7 @@ plt.xlabel("Spectrum Channel")
 plt.ylabel("Spectral Energy")
 plt.title("BLXXXgrd02 Data: Speaker = " + str(spk)+ ", Phone = "+str(phone) + " ('"+phone_letters+"')")
 plt.legend(loc='best')
-plt.ylim([0,1000])
+plt.ylim([0,100])
 
 # Save the figure as an image
 plt.tight_layout()
