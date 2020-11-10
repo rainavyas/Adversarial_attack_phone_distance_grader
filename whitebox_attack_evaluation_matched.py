@@ -2,6 +2,14 @@ import torch
 import numpy as np
 from attack_models import Spectral_attack
 from utility import *
+import argparse
+
+# Get command line arguments
+commandLineParser = argparse.ArgumentParser()
+commandLineParser.add_argument('--barrier_val', default=1.0, type=float, help='specify attack model to load with barrier val')
+
+args = commandLineParser.parse_args()
+barrier_val = args.barrier_val
 
 # Load the means and covariances
 input_file = 'BLXXXeval3_means_covs.npz'
@@ -27,8 +35,9 @@ y = torch.from_numpy(y).float()
 p_covariances = p_covariances + (1e-3*torch.eye(13))
 q_covariances = q_covariances + (1e-3*torch.eye(13))
 
-# Load the model
-attack_model_path = "attack_model_init_root_seed2.pt"
+# Load the attack model
+attack_model_path = "attack_model_init_root_constrained"+str(barrier_val)+"_seed1.pt"
+print("Results for attack model: " + attack_model_path)
 attack_model = torch.load(attack_model_path)
 attack_model.eval()
 
@@ -58,7 +67,7 @@ print("mse: "+ str(mse)+"\n pcc: "+str(pcc)+"\n less than 1 away: "+ str(less1)+
 
 # Stats with attack
 print("---------------------------------------------------------")
-print("STATS with no attack")
+print("STATS with attack")
 mse = calculate_mse(y_pred_attack.tolist(), y_list)
 pcc = calculate_pcc(y_pred_attack, y)
 less1 = calculate_less1(y_pred_attack, y)

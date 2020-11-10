@@ -23,7 +23,7 @@ def clip_params(model, barrier_val):
 
 # Get command line arguments
 commandLineParser = argparse.ArgumentParser()
-commandLineParser.add_argument('--barrier_val', default=1.0 type=float, help='limit on spectral attack noise')
+commandLineParser.add_argument('--barrier_val', default=1.0, type=float, help='limit on spectral attack noise')
 
 args = commandLineParser.parse_args()
 barrier_val = args.barrier_val

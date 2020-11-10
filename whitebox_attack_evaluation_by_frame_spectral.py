@@ -5,6 +5,7 @@ import torch_dct as dct
 from models import FCC
 from attack_models import Spectral_attack
 from utility import *
+import argparse
 
 def get_phones(alphabet='arpabet'):
     if alphabet == 'arpabet':
@@ -104,6 +105,13 @@ def get_pdf_attack(obj, phones, attack):
 
     return p_means, p_covariances, q_means, q_covariances, num_phones_mask
 
+# Get command line arguments
+commandLineParser = argparse.ArgumentParser()
+commandLineParser.add_argument('--barrier_val', default=1.0, type=float, help='specify attack model to load with barrier val')
+
+args = commandLineParser.parse_args()
+barrier_val = args.barrier_val
+
 
 #pkl_file = '/home/alta/BLTSpeaking/exp-vr313/data/mfcc13/GKTS4-D3/grader/BLXXXgrd02/BLXXXgrd02.pkl'
 pkl_file = '/home/alta/BLTSpeaking/exp-vr313/data/mfcc13/GKTS4-D3/grader/BLXXXeval3/BLXXXeval3.pkl'
@@ -115,7 +123,8 @@ print("loaded pkl")
 phones = get_phones()
 
 # get the attack spectral vector
-attack_model_path = "attack_model_seed1.pt"
+#attack_model_path = "attack_model_seed1.pt"
+attack_model_path = "attack_model_init_root_constrained"+str(barrier_val)+"_seed1.pt"
 attack_model = torch.load(attack_model_path)
 attack_model.eval()
 attack = attack_model.get_noise()
@@ -153,6 +162,8 @@ y_pred[y_pred<0]=0.0
 y_pred_list = y_pred.tolist()
 attack_avg_grade = torch.mean(y_pred)
 
+
+print("Results for spectral attack by frame, with attack model: "+attack_model_path)
 
 # get the noise
 noise = attack_model.get_noise()
