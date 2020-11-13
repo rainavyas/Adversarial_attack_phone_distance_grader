@@ -15,19 +15,21 @@ def get_phones(alphabet='arpabet'):
     raise ValueError('Alphabet name not recognised: ' + alphabet)
 
 
-def get_vects(obj, phones, max_num_mfccs_length):
+def get_vects(obj, phones, max_len_frames):
     n = len(obj['plp'][0][0][0][0][0]) # dimension of mfcc vector
+    num_spk = len(obj['plp'])
+    num_spk = 5 #temp
 
     # Define the tensors required by spectral attack model
-    p_vects = np.zeros((len(obj['plp']), int((len(phones)-1)*(len(phones)-2)*0.5) , max_num_mfccs_length, n))
-    q_vects = np.zeros((len(obj['plp']), int((len(phones)-1)*(len(phones)-2)*0.5) , max_num_mfccs_length, n))
-    num_phones_mask = np.zeros((len(obj['plp']), int((len(phones)-1)*(len(phones)-2)*0.5)))
-    p_mfcc_lengths = np.zeros((len(obj['plp']),  int((len(phones)-1)*(len(phones)-2)*0.5)))
-    q_mfcc_lengths = np.zeros((len(obj['plp']),  int((len(phones)-1)*(len(phones)-2)*0.5)))
+    p_vects = np.zeros((num_spk, int((len(phones)-1)*(len(phones)-2)*0.5) , max_len_frames, n))
+    q_vects = np.zeros((num_spk, int((len(phones)-1)*(len(phones)-2)*0.5) , max_len_frames, n))
+    num_phones_mask = np.zeros((num_spk, int((len(phones)-1)*(len(phones)-2)*0.5)))
+    p_mask = np.zeros(num_spk,  int((len(phones)-1)*(len(phones)-2)*0.5), max_len_frames))
+    q_mask = np.zeros(num_spk,  int((len(phones)-1)*(len(phones)-2)*0.5), max_len_frames))
 
 
-    for spk in range(len(obj['plp'])):
-        print("On speaker " + str(spk) + " of " + str(len(obj['plp'])))
+    for spk in range(num_spk):
+        print("On speaker " + str(spk) + " of " + str(num_spk))
         Xs = np.zeros((len(phones) - 1, max_num_mfccs_length, n))
         N = np.zeros(len(phones) - 1)
 
@@ -52,12 +54,14 @@ def get_vects(obj, phones, max_num_mfccs_length):
                     # later the mask will be used to make these features "-1"
                     num_phones_mask[spk][k] = 0
                     # Store length as 1 (in reality 0), to prevent division by 0 later on
-                    p_mfcc_lengths[spk][k] = 1
-                    q_mfcc_lengths[spk][k] = 1
+                    p_mask[spk][k][0] = 1
+                    q_mask[spk][k][0] = 1
                 else:
                     num_phones_mask[spk][k] = 1
-                    p_mfcc_lengths[spk][k] = N[i]
-                    q_mfcc_lengths[spk][k] = N[j]
+                    for frame in range(N[i]):
+                        p_mask[spk][k][frame] = 1
+                    for frame in range(N[j])
+                        q_mask[spk][k][frame] = 1
 
                 p_vects[spk][k] = Xs[i].squeeze()
                 q_vects[spk][k] = Xs[j].squeeze()
@@ -67,26 +71,26 @@ def get_vects(obj, phones, max_num_mfccs_length):
     return p_vects, q_vects, p_mfcc_lengths, q_mfcc_lengths, num_phones_mask
 
 
-pkl_file = '/home/alta/BLTSpeaking/exp-vr313/data/mfcc13/GKTS4-D3/grader/BLXXXgrd02/BLXXXgrd02.pkl'
-#pkl_file = '/home/alta/BLTSpeaking/exp-vr313/data/mfcc13/GKTS4-D3/grader/BLXXXeval3/BLXXXeval3.pkl'
-pkl = pickle.load(open(pkl_file, "rb"))
-
-print("loaded pkl")
-
-# get the phones
-phones = get_phones()
-
-# get the mfcc vects as  [batch_size x 1128 x max_mfccs_per_phone x mfcc_dim] split into p and q groups (for doing kl)
-max_num_mfccs_length = 4000
-p_vects, q_vects, p_lengths, q_lengths, mask = get_vects(pkl, phones, max_num_mfccs_length)
-
-# get output labels
-y = (pkl['score'])
-y = np.array(y)
-
-# write to output file
-output_file = 'BLXXXgrd02_pqvects.npz'
-#output_file = 'BLXXXeval3_pqvects.npz'
-#pkl_obj = [p_vects.tolist(), q_vects.tolist(),  p_lengths.tolist(), q_lengths.tolist(), mask.tolist(), y.tolist()]
-#pickle.dump(pkl_obj, open(output_file, "wb"))
-np.savez(output_file, p_vects, q_vects, p_lengths, q_lengths, mask, y)
+# pkl_file = '/home/alta/BLTSpeaking/exp-vr313/data/mfcc13/GKTS4-D3/grader/BLXXXgrd02/BLXXXgrd02.pkl'
+# #pkl_file = '/home/alta/BLTSpeaking/exp-vr313/data/mfcc13/GKTS4-D3/grader/BLXXXeval3/BLXXXeval3.pkl'
+# pkl = pickle.load(open(pkl_file, "rb"))
+#
+# print("loaded pkl")
+#
+# # get the phones
+# phones = get_phones()
+#
+# # get the mfcc vects as  [batch_size x 1128 x max_mfccs_per_phone x mfcc_dim] split into p and q groups (for doing kl)
+# max_num_mfccs_length = 4000
+# p_vects, q_vects, p_mask, q_mask, mask = get_vects(pkl, phones, max_num_mfccs_length)
+#
+# # get output labels
+# y = (pkl['score'])
+# y = np.array(y)
+#
+# # write to output file
+# output_file = 'BLXXXgrd02_pqvects.npz'
+# #output_file = 'BLXXXeval3_pqvects.npz'
+# #pkl_obj = [p_vects.tolist(), q_vects.tolist(),  p_lengths.tolist(), q_lengths.tolist(), mask.tolist(), y.tolist()]
+# #pickle.dump(pkl_obj, open(output_file, "wb"))
+# np.savez(output_file, p_vects, q_vects, p_lengths, q_lengths, mask, y)
