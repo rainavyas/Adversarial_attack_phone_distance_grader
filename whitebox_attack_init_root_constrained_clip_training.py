@@ -2,7 +2,7 @@ import torch
 from torch.utils.data import TensorDataset
 from torch.utils.data import DataLoader
 import numpy as np
-from attack_models_init_root import Spectral_attack_init
+from attack_models_init_root import Spectral_attack_init, Spectral_attack_Taylor1_init
 import math
 import argparse
 
@@ -75,7 +75,8 @@ train_ds = TensorDataset(p_means, p_covariances, q_means, q_covariances, mask)
 # Use DataLoader to handle minibatches easily
 train_dl = DataLoader(train_ds, batch_size = bs, shuffle = True)
 
-attack_model = Spectral_attack_init(spectral_dim, mfcc_dim, trained_model_path, init_root)
+#attack_model = Spectral_attack_init(spectral_dim, mfcc_dim, trained_model_path, init_root)
+attack_model = Spectral_attack_Taylor1_init(spectral_dim, mfcc_dim, trained_model_path, init_root)
 print("model initialised")
 
 optimizer = torch.optim.SGD(attack_model.parameters(), lr=lr, momentum = 0.9, nesterov=True)
@@ -122,5 +123,6 @@ for epoch in range(epochs):
     scheduler.step()
 
 # save the model
-output_file = "attack_model_init_root_constrained"+str(barrier_val)+"_seed"+str(seed)+".pt"
+#output_file = "attack_model_init_root_constrained"+str(barrier_val)+"_seed"+str(seed)+".pt"
+output_file = "attack_model_Taylor1_init_root_constrained"+str(barrier_val)+"_seed"+str(seed)+".pt"
 torch.save(attack_model, output_file)
