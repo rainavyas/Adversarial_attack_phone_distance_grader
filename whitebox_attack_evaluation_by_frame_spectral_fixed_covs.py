@@ -123,7 +123,8 @@ print("loaded pkl")
 phones = get_phones()
 
 # get the attack spectral vector
-attack_model_path = "attack_model_init_root_constrained"+str(barrier_val)+"_seed1.pt"
+attack_model_path = "attack_model_Taylor1_init_root_constrained"+str(barrier_val)+"_seed1.pt"
+#attack_model_path = "attack_model_init_root_constrained"+str(barrier_val)+"_seed1.pt"
 #attack_model_path = "attack_model_seed1.pt"
 attack_model = torch.load(attack_model_path)
 attack_model.eval()

@@ -42,8 +42,8 @@ class LPRON(torch.nn.Module):
         p_vects_unsq_T = torch.transpose(p_vects_unsq, 3, 4)
         q_vects_unsq_T = torch.transpose(q_vects_unsq, 3, 4)
 
-        p_means_squared = torch.squeeze(torch.sum(torch.matmul(p_vects_unsq_T, p_vects_unsq), dim=2)/p_lengths)
-        q_means_squared = torch.squeeze(torch.sum(torch.matmul(q_vects_unsq_T, q_vects_unsq), dim=2)/q_lengths)
+        p_means_squared = torch.squeeze(torch.sum(torch.matmul(p_vects_unsq, p_vects_unsq_T), dim=2)/p_lengths)
+        q_means_squared = torch.squeeze(torch.sum(torch.matmul(q_vects_unsq, q_vects_unsq_T), dim=2)/q_lengths)
 
         p_means_unsq = torch.unsqueeze(p_means, dim=4)
         q_means_unsq = torch.unsqueeze(q_means, dim=4)
@@ -51,8 +51,8 @@ class LPRON(torch.nn.Module):
         p_means_unsq_T = torch.transpose(p_means_unsq, 2, 3)
         q_means_unsq_T = torch.transpose(q_means_unsq, 2, 3)
 
-        p_m2 = torch.squeeze(torch.matmul(p_means_unsq_T, p_means_unsq))
-        q_m2 = torch.squeeze(torch.matmul(q_means_unsq_T, q_means_unsq))
+        p_m2 = torch.squeeze(torch.matmul(p_means_unsq, p_means_unsq_T))
+        q_m2 = torch.squeeze(torch.matmul(q_means_unsq, q_means_unsq_T))
 
         p_covariances = p_means_squared - p_m2
         q_covariances = q_means_squared - q_m2

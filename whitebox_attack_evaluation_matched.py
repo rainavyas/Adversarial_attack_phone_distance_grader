@@ -36,7 +36,8 @@ p_covariances = p_covariances + (1e-3*torch.eye(13))
 q_covariances = q_covariances + (1e-3*torch.eye(13))
 
 # Load the attack model
-attack_model_path = "attack_model_init_root_constrained"+str(barrier_val)+"_seed1.pt"
+#attack_model_path = "attack_model_init_root_constrained"+str(barrier_val)+"_seed1.pt"
+attack_model_path = "attack_model_Taylor1_init_root_constrained"+str(barrier_val)+"_seed1.pt"
 print("Results for attack model: " + attack_model_path)
 attack_model = torch.load(attack_model_path)
 attack_model.eval()
