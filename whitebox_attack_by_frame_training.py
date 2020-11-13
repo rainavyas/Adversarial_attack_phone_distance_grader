@@ -6,6 +6,7 @@ from attack_models_by_frame_spectral import Spectral_attack_by_frame
 import math
 import argparse
 from pkl2pqvects import get_phones, get_vects
+import pickle
 
 def clip_params(model, barrier_val):
     old_params = {}
@@ -35,7 +36,7 @@ print("loaded pkl")
 # get the phones
 phones = get_phones()
 max_len_frames = 4000
-p_vects, q_vects, p_mask, q_mask, mask = get_vects(pkl, phones, max_num_mfccs_length)
+p_vects, q_vects, p_mask, q_mask, mask = get_vects(pkl, phones, max_len_frames)
 
 # Get output labels
 y = pkl['score']
@@ -65,7 +66,7 @@ barrier_val = barrier_val
 barriers = torch.FloatTensor([1]*spectral_dim)
 
 # Store all training dataset in a single wrapped tensor
-train_ds = TensorDataset(p_vects, q_vects, p_frames_mask, q_frames_mask, num_phones_mask)
+train_ds = TensorDataset(p_vects, q_vects, p_mask, q_mask, mask)
 
 # Use DataLoader to handle minibatches easily
 train_dl = DataLoader(train_ds, batch_size = bs, shuffle = True)

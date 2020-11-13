@@ -30,7 +30,7 @@ def get_vects(obj, phones, max_len_frames):
 
     for spk in range(num_spk):
         print("On speaker " + str(spk) + " of " + str(num_spk))
-        Xs = np.zeros((len(phones) - 1, max_num_mfccs_length, n))
+        Xs = np.zeros((len(phones) - 1, max_len_frames, n))
         N = np.zeros(len(phones) - 1)
 
         for utt in range(len(obj['plp'][spk])):
@@ -58,9 +58,9 @@ def get_vects(obj, phones, max_len_frames):
                     q_mask[spk][k][0] = 1
                 else:
                     num_phones_mask[spk][k] = 1
-                    for frame in range(N[i]):
+                    for frame in range(int(N[i])):
                         p_mask[spk][k][frame] = 1
-                    for frame in range(N[j])
+                    for frame in range(int(N[j])):
                         q_mask[spk][k][frame] = 1
 
                 p_vects[spk][k] = Xs[i].squeeze()
@@ -68,7 +68,7 @@ def get_vects(obj, phones, max_len_frames):
 
                 k += 1
 
-    return p_vects, q_vects, p_mfcc_lengths, q_mfcc_lengths, num_phones_mask
+    return p_vects, q_vects, p_mask, q_mask, num_phones_mask
 
 
 # pkl_file = '/home/alta/BLTSpeaking/exp-vr313/data/mfcc13/GKTS4-D3/grader/BLXXXgrd02/BLXXXgrd02.pkl'
