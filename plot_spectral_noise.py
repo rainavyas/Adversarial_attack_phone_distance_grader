@@ -4,7 +4,7 @@ from attack_models import Spectral_attack
 import numpy as np
 import torch
 import torch_dct as dct
-
+import argparse
 
 def get_phones(alphabet='arpabet'):
     if alphabet == 'arpabet':
@@ -54,21 +54,35 @@ def get_spectral_vects(obj, spk, phone, num_channels):
 
     return spectral_vects
 
+# Get command line arguments
+commandLineParser = argparse.ArgumentParser()
+commandLineParser.add_argument('--barrier_val', default=1.0, type=float, help='specify attack model to load with barrier val')
+commandLineParser.add_argument('--spk', default=2, type=int, help='specify the speaker')
+commandLineParser.add_argument('--phone', default=3, type=int, help='specify the phone')
+
+
+args = commandLineParser.parse_args()
+barrier_val = args.barrier_val
+spk = args.spk
+phone = args.phone
+
+
 pkl_file = '/home/alta/BLTSpeaking/exp-vr313/data/mfcc13/GKTS4-D3/grader/BLXXXgrd02/BLXXXgrd02.pkl'
 #pkl_file = '/home/alta/BLTSpeaking/exp-vr313/data/mfcc13/GKTS4-D3/grader/BLXXXeval3/BLXXXeval3.pkl'
 pkl = pickle.load(open(pkl_file, "rb"))
 
 
 # get the attack spectral vector
-attack_model_path = "attack_model_seed1.pt"
+#attack_model_path = "attack_model_seed1.pt"
+attack_model_path = "attack_model_init_root_constrained"+str(barrier_val)+"_seed1.pt"
 attack_model = torch.load(attack_model_path)
 attack_model.eval()
 attack = attack_model.get_noise()
 attack = attack.detach().numpy()
 
 # Choose speaker and phone to see channel energies for
-spk = 723
-phone = 35
+spk = spk
+phone = phone
 num_channels = 24
 
 phones = get_phones()
@@ -102,7 +116,7 @@ plt.xlabel("Spectrum Channel")
 plt.ylabel("Spectral Energy")
 plt.title("BLXXXgrd02 Data: Speaker = " + str(spk)+ ", Phone = "+str(phone) + " ('"+phone_letters+"')")
 plt.legend(loc='best')
-plt.ylim([0,100])
+plt.ylim([0,200])
 
 # Save the figure as an image
 plt.tight_layout()
