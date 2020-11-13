@@ -24,8 +24,8 @@ def get_vects(obj, phones, max_len_frames):
     p_vects = np.zeros((num_spk, int((len(phones)-1)*(len(phones)-2)*0.5) , max_len_frames, n))
     q_vects = np.zeros((num_spk, int((len(phones)-1)*(len(phones)-2)*0.5) , max_len_frames, n))
     num_phones_mask = np.zeros((num_spk, int((len(phones)-1)*(len(phones)-2)*0.5)))
-    p_mask = np.zeros(num_spk,  int((len(phones)-1)*(len(phones)-2)*0.5), max_len_frames))
-    q_mask = np.zeros(num_spk,  int((len(phones)-1)*(len(phones)-2)*0.5), max_len_frames))
+    p_mask = np.zeros((num_spk, int((len(phones)-1)*(len(phones)-2)*0.5), max_len_frames))
+    q_mask = np.zeros((num_spk, int((len(phones)-1)*(len(phones)-2)*0.5), max_len_frames))
 
 
     for spk in range(num_spk):
