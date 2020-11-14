@@ -18,8 +18,8 @@ class Spectral_attack_by_frame(torch.nn.Module):
     def get_pq_means_covs(self, p_vects, q_vects, p_frames_mask, q_frames_mask, num_phones_mask):
 
         # Get p/q_lengths
-        p_lengths = torch.sum(p_frames_mask, dim=2)
-        q_lengths = torch.sum(q_frames_mask, dim=2)
+        p_lengths = torch.sum(p_frames_mask[:,:,:,0].squeeze(), dim=2).unsqueeze(dim=2).repeat(1,1,13)
+        q_lengths = torch.sum(q_frames_mask[:,:,:,0].squeeze(), dim=2).unsqueeze(dim=2).repeat(1,1,13)
 
         # Compute means
         p_means = torch.sum(p_vects, dim=2)/p_lengths
@@ -32,11 +32,11 @@ class Spectral_attack_by_frame(torch.nn.Module):
         p_vects_unsq_T = torch.transpose(p_vects_unsq, 3, 4)
         q_vects_unsq_T = torch.transpose(q_vects_unsq, 3, 4)
 
-        p_means_squared = torch.squeeze(torch.sum(torch.matmul(p_vects_unsq, p_vects_unsq_T), dim=2)/p_lengths)
-        q_means_squared = torch.squeeze(torch.sum(torch.matmul(q_vects_unsq, q_vects_unsq_T), dim=2)/q_lengths)
+        p_means_squared = torch.squeeze(torch.sum(torch.matmul(p_vects_unsq, p_vects_unsq_T), dim=2)/p_lengths.unsqueeze(dim=3).repeat(1,1,1,13))
+        q_means_squared = torch.squeeze(torch.sum(torch.matmul(q_vects_unsq, q_vects_unsq_T), dim=2)/q_lengths.unsqueeze(dim=3).repeat(1,1,1,13))
 
-        p_means_unsq = torch.unsqueeze(p_means, dim=4)
-        q_means_unsq = torch.unsqueeze(q_means, dim=4)
+        p_means_unsq = torch.unsqueeze(p_means, dim=3)
+        q_means_unsq = torch.unsqueeze(q_means, dim=3)
 
         p_means_unsq_T = torch.transpose(p_means_unsq, 2, 3)
         q_means_unsq_T = torch.transpose(q_means_unsq, 2, 3)
@@ -46,6 +46,7 @@ class Spectral_attack_by_frame(torch.nn.Module):
 
         p_covariances = p_means_squared - p_m2
         q_covariances = q_means_squared - q_m2
+
 
         return p_means, p_covariances, q_means, q_covariances
 
@@ -104,11 +105,14 @@ class Spectral_attack_by_frame(torch.nn.Module):
         q_vects_masked = q_vects_attacked * q_frames_mask
 
         # Compute the p/q_means tensor and covariance tensor
-        p_means, p_covariances, q_means, q_covariances = get_pq_means_covs(p_vects_masked, q_vects_masked, p_frames_mask, q_frames_mask, num_phones_mask)
+        p_means, p_covariances, q_means, q_covariances = self.get_pq_means_covs(p_vects_masked, q_vects_masked, p_frames_mask, q_frames_mask, num_phones_mask)
 
         # add small noise to all covariance matrices to ensure they are non-singular
-        p_covariances_noised = p_covariances + (1e-3*torch.eye(13))
-        q_covariances_noised = q_covariances + (1e-3*torch.eye(13))
+        p_covariances_noised = p_covariances + (1e-2*torch.eye(13))
+        q_covariances_noised = q_covariances + (1e-2*torch.eye(13))
+
+        print(p_covariances_noised[0,3,:,:])
+        print(q_covariances_noised[1,4,:,:])
 
         # Pass through trained model
         trained_model = torch.load(self.trained_model_path)
@@ -124,10 +128,10 @@ class Spectral_attack_by_frame(torch.nn.Module):
         return the grade predictions with no adversarial attack
         '''
         # Compute the p/q_means tensor and covariance tensor
-        p_means, p_covariances, q_means, q_covariances = get_pq_means_covs(p_vects, q_vects, p_frames_mask, q_frames_mask, num_phones_mask)
+        p_means, p_covariances, q_means, q_covariances = self.get_pq_means_covs(p_vects, q_vects, p_frames_mask, q_frames_mask, num_phones_mask)
         # add small noise to all covariance matrices to ensure they are non-singular
-        p_covariances_noised = p_covariances + (1e-3*torch.eye(13))
-        q_covariances_noised = q_covariances + (1e-3*torch.eye(13))
+        p_covariances_noised = p_covariances + (1e-2*torch.eye(13))
+        q_covariances_noised = q_covariances + (1e-2*torch.eye(13))
 
         trained_model = torch.load(self.trained_model_path)
         trained_model.eval()

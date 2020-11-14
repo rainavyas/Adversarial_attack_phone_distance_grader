@@ -53,7 +53,7 @@ y = torch.from_numpy(y).float()
 # Define constants
 lr = 5*1e-2
 epochs = 30
-bs = 100
+bs = 2
 seed = 1
 torch.manual_seed(seed)
 trained_model_path = "FCC_lpron_seed1.pt"
@@ -61,9 +61,9 @@ spectral_dim = 24
 mfcc_dim = 13
 sch = 0.985
 
-init_root = torch.FloatTensor([-1]*spectral_dim)
+init_root = torch.FloatTensor([-4]*spectral_dim)
 barrier_val = barrier_val
-barriers = torch.FloatTensor([1]*spectral_dim)
+barriers = torch.FloatTensor([barrier_val]*spectral_dim)
 
 # Store all training dataset in a single wrapped tensor
 train_ds = TensorDataset(p_vects, q_vects, p_mask, q_mask, mask)

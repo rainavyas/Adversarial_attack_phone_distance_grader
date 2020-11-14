@@ -18,14 +18,14 @@ def get_phones(alphabet='arpabet'):
 def get_vects(obj, phones, max_len_frames):
     n = len(obj['plp'][0][0][0][0][0]) # dimension of mfcc vector
     num_spk = len(obj['plp'])
-    num_spk = 5 #temp
+    num_spk = 10 #temp
 
     # Define the tensors required by spectral attack model
     p_vects = np.zeros((num_spk, int((len(phones)-1)*(len(phones)-2)*0.5) , max_len_frames, n))
     q_vects = np.zeros((num_spk, int((len(phones)-1)*(len(phones)-2)*0.5) , max_len_frames, n))
     num_phones_mask = np.zeros((num_spk, int((len(phones)-1)*(len(phones)-2)*0.5)))
-    p_mask = np.zeros((num_spk, int((len(phones)-1)*(len(phones)-2)*0.5), max_len_frames))
-    q_mask = np.zeros((num_spk, int((len(phones)-1)*(len(phones)-2)*0.5), max_len_frames))
+    p_mask = np.zeros((num_spk, int((len(phones)-1)*(len(phones)-2)*0.5), max_len_frames, n))
+    q_mask = np.zeros((num_spk, int((len(phones)-1)*(len(phones)-2)*0.5), max_len_frames, n))
 
 
     for spk in range(num_spk):
@@ -59,9 +59,9 @@ def get_vects(obj, phones, max_len_frames):
                 else:
                     num_phones_mask[spk][k] = 1
                     for frame in range(int(N[i])):
-                        p_mask[spk][k][frame] = 1
+                        p_mask[spk][k][frame] = np.ones(n)
                     for frame in range(int(N[j])):
-                        q_mask[spk][k][frame] = 1
+                        q_mask[spk][k][frame] = np.ones(n)
 
                 p_vects[spk][k] = Xs[i].squeeze()
                 q_vects[spk][k] = Xs[j].squeeze()
