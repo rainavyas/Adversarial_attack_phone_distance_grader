@@ -111,8 +111,8 @@ class Spectral_attack_by_frame(torch.nn.Module):
         p_covariances_noised = p_covariances + (1e-2*torch.eye(13))
         q_covariances_noised = q_covariances + (1e-2*torch.eye(13))
 
-        print(p_covariances_noised[0,3,:,:])
-        print(q_covariances_noised[1,4,:,:])
+#        print(p_covariances_noised[0,3,:,:])
+#        print(q_covariances_noised[1,4,:,:])
 
         # Pass through trained model
         trained_model = torch.load(self.trained_model_path)

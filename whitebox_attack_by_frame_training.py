@@ -51,9 +51,9 @@ mask = torch.from_numpy(mask).float()
 y = torch.from_numpy(y).float()
 
 # Define constants
-lr = 5*1e-2
+lr = 5*1e-1
 epochs = 30
-bs = 2
+bs = 5
 seed = 1
 torch.manual_seed(seed)
 trained_model_path = "FCC_lpron_seed1.pt"
@@ -61,7 +61,7 @@ spectral_dim = 24
 mfcc_dim = 13
 sch = 0.985
 
-init_root = torch.FloatTensor([-4]*spectral_dim)
+init_root = torch.FloatTensor([-1]*spectral_dim)
 barrier_val = barrier_val
 barriers = torch.FloatTensor([barrier_val]*spectral_dim)
 
@@ -101,13 +101,13 @@ for epoch in range(epochs):
     print("loss: ", loss.item())
     # Check average grade prediction
     attack_model.eval()
-    y_pred_no_attack = attack_model.get_preds_no_noise(p_vects, q_vects, p_mask, q_mask, mask)
-    no_attack_avg_grade = torch.mean(y_pred_no_attack)
+    #y_pred_no_attack = attack_model.get_preds_no_noise(p_vects, q_vects, p_mask, q_mask, mask)
+    #no_attack_avg_grade = torch.mean(y_pred_no_attack)
     y_pred_attack = attack_model(p_vects, q_vects, p_mask, q_mask, mask)
     attack_avg_grade = torch.mean(y_pred_attack)
     print("epoch", epoch)
     print("On validation")
-    print("No attack average grade: ", no_attack_avg_grade)
+    #print("No attack average grade: ", no_attack_avg_grade)
     print("Attacked average grade: ", attack_avg_grade)
 
     # get the noise

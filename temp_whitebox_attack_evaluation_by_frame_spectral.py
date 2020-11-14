@@ -52,6 +52,7 @@ def spectral_attack(X, attack):
 def get_pdf_attack(obj, phones, attack):
     n = len(obj['plp'][0][0][0][0][0]) # dimension of mfcc vector
     num_spk = len(obj['plp'])
+    num_spk = 20
 
     # Define the tensors required by spectral attack model
     p_means = np.zeros((num_spk, int((len(phones)-1)*(len(phones)-2)*0.5) , n))
@@ -114,8 +115,8 @@ args = commandLineParser.parse_args()
 barrier_val = args.barrier_val
 
 
-#pkl_file = '/home/alta/BLTSpeaking/exp-vr313/data/mfcc13/GKTS4-D3/grader/BLXXXgrd02/BLXXXgrd02.pkl'
-pkl_file = '/home/alta/BLTSpeaking/exp-vr313/data/mfcc13/GKTS4-D3/grader/BLXXXeval3/BLXXXeval3.pkl'
+pkl_file = '/home/alta/BLTSpeaking/exp-vr313/data/mfcc13/GKTS4-D3/grader/BLXXXgrd02/BLXXXgrd02.pkl'
+#pkl_file = '/home/alta/BLTSpeaking/exp-vr313/data/mfcc13/GKTS4-D3/grader/BLXXXeval3/BLXXXeval3.pkl'
 pkl = pickle.load(open(pkl_file, "rb"))
 
 print("loaded pkl")
@@ -132,6 +133,7 @@ attack_model.eval()
 attack = attack_model.get_noise()
 attack = attack.detach().numpy()
 
+attack = np.array([1.0, 0.0966, 1.0, 0.7846, 0.3997, 0.0040, 0.1374, 0.1373, 0.0979, 1.0000, 1.0000, 0.0597, 0.0812, 0.0080, 0.0142, 0.2040, 0.0577, 0.1652, 0.0011, 0.8029, 0.2753, 0.0834, 0.0127, 1.0000])
 
 # get the means and covariances split into p and q groups (for doing kl) with attack by frame in spectral space
 p_means, p_covariances, q_means, q_covariances, mask = get_pdf_attack(pkl, phones, attack)
@@ -139,6 +141,7 @@ p_means, p_covariances, q_means, q_covariances, mask = get_pdf_attack(pkl, phone
 # get output labels
 y = (pkl['score'])
 y = np.array(y)
+y = y[:20] # temp
 
 
 # convert to tensors
@@ -187,3 +190,39 @@ print("mse: "+ str(mse)+"\n pcc: "+str(pcc)+"\n less than 1 away: "+ str(less1)+
 print("------------------------------------------------------------")
 
 print("Attacked average grade: ", attack_avg_grade)
+
+# Get stats with no attack
+
+# Load the means and covariances
+input_file = 'BLXXXgrd02_means_covs.npz'
+#input_file = 'BLXXXeval3_means_covs.npz'
+npzfile = np.load(input_file)
+p_means = npzfile['arr_0'][:20]
+p_covariances = npzfile['arr_1'][:20]
+q_means = npzfile['arr_2'][:20]
+q_covariances = npzfile['arr_3'][:20]
+mask = npzfile['arr_4'][:20]
+y = npzfile['arr_5'][:20]
+
+# convert to tensors
+p_means = torch.from_numpy(p_means).float()
+p_covariances = torch.from_numpy(p_covariances).float()
+q_means = torch.from_numpy(q_means).float()
+q_covariances = torch.from_numpy(q_covariances).float()
+mask = torch.from_numpy(mask).float()
+y = torch.from_numpy(y).float()
+
+# add small noise to all covariance matrices to ensure they are non-singular
+p_covariances = p_covariances + (1e-3*torch.eye(13))
+q_covariances = q_covariances + (1e-3*torch.eye(13))
+
+
+
+y_pred = model(p_means, p_covariances, q_means, q_covariances, mask)
+y_pred[y_pred>6]=6.0
+y_pred[y_pred<0]=0.0
+y_pred_list = y_pred.tolist()
+attack_avg_grade = torch.mean(y_pred)
+
+print("Not attacked average grade: ", attack_avg_grade)
+

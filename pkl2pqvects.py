@@ -18,7 +18,7 @@ def get_phones(alphabet='arpabet'):
 def get_vects(obj, phones, max_len_frames):
     n = len(obj['plp'][0][0][0][0][0]) # dimension of mfcc vector
     num_spk = len(obj['plp'])
-    num_spk = 10 #temp
+    num_spk = 20 #temp
 
     # Define the tensors required by spectral attack model
     p_vects = np.zeros((num_spk, int((len(phones)-1)*(len(phones)-2)*0.5) , max_len_frames, n))
@@ -54,8 +54,8 @@ def get_vects(obj, phones, max_len_frames):
                     # later the mask will be used to make these features "-1"
                     num_phones_mask[spk][k] = 0
                     # Store length as 1 (in reality 0), to prevent division by 0 later on
-                    p_mask[spk][k][0] = 1
-                    q_mask[spk][k][0] = 1
+                    p_mask[spk][k][0] = np.ones(n)
+                    q_mask[spk][k][0] = np.ones(n)
                 else:
                     num_phones_mask[spk][k] = 1
                     for frame in range(int(N[i])):
