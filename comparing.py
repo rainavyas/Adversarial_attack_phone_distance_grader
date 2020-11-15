@@ -1,6 +1,7 @@
 import torch
-import numpy
+import numpy as np
 from pkl2pqvects import get_phones, get_vects
+import pickle
 
 def get_pdf(obj, phones):
     n = len(obj['plp'][0][0][0][0][0]) # dimension of mfcc vector
@@ -72,19 +73,50 @@ phones = get_phones()
 max_len_frames = 4000
 p_vects, q_vects, p_mask, q_mask, mask = get_vects(pkl, phones, max_len_frames)
 
+# Convert to pytorch tensors
+p_vects = torch.from_numpy(p_vects).float()
+q_vects = torch.from_numpy(q_vects).float()
+p_mask = torch.from_numpy(p_mask).float()
+q_mask= torch.from_numpy(q_mask).float()
+mask = torch.from_numpy(mask).float()
+
 # Apply torch operations
 # Get p/q_lengths
-p_lengths = torch.sum(p_frames_mask[:,:,:,0].squeeze(), dim=2).unsqueeze(dim=2).repeat(1,1,13)
-q_lengths = torch.sum(q_frames_mask[:,:,:,0].squeeze(), dim=2).unsqueeze(dim=2).repeat(1,1,13)
+p_lengths = torch.sum(p_mask[:,:,:,0].squeeze(), dim=2).unsqueeze(dim=2).repeat(1,1,13)
+q_lengths = torch.sum(q_mask[:,:,:,0].squeeze(), dim=2).unsqueeze(dim=2).repeat(1,1,13)
 
 # Compute means
-p_means_tr = torch.sum(p_vects, dim=2)/p_lengths
-q_means_tr = torch.sum(q_vects, dim=2)/q_lengths
+p_means = torch.sum(p_vects, dim=2)/p_lengths
+q_means = torch.sum(q_vects, dim=2)/q_lengths
 
-p_means, p_covariances, q_means, q_covariances, num_phones_mask = get_pdf(pkl, phones)
+# Compute the p/q_covariances tensor
+p_vects_unsq = torch.unsqueeze(p_vects, dim=4)
+q_vects_unsq = torch.unsqueeze(q_vects, dim=4)
+
+p_vects_unsq_T = torch.transpose(p_vects_unsq, 3, 4)
+q_vects_unsq_T = torch.transpose(q_vects_unsq, 3, 4)
+
+p_means_squared = torch.squeeze(torch.sum(torch.matmul(p_vects_unsq, p_vects_unsq_T), dim=2)/p_lengths.unsqueeze(dim=3).repeat(1,1,1,13))
+q_means_squared = torch.squeeze(torch.sum(torch.matmul(q_vects_unsq, q_vects_unsq_T), dim=2)/q_lengths.unsqueeze(dim=3).repeat(1,1,1,13))
+
+p_means_unsq = torch.unsqueeze(p_means, dim=3)
+q_means_unsq = torch.unsqueeze(q_means, dim=3)
+
+p_means_unsq_T = torch.transpose(p_means_unsq, 2, 3)
+q_means_unsq_T = torch.transpose(q_means_unsq, 2, 3)
+
+p_m2 = torch.squeeze(torch.matmul(p_means_unsq, p_means_unsq_T))
+q_m2 = torch.squeeze(torch.matmul(q_means_unsq, q_means_unsq_T))
+
+p_covariances = p_means_squared - p_m2
+q_covariances = q_means_squared - q_m2
+
+
+
+p_means_np, p_covariances_np, q_means_np, q_covariances_np, num_phones_mask = get_pdf(pkl, phones)
 
 
 print("Torch:")
-print(p_means_tr[0][2])
+print(q_covariances[spk][phone])
 print("Numpy:")
-print(p_means)
+print(q_covariances_np[spk][phone])

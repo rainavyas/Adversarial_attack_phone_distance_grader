@@ -47,8 +47,17 @@ class Spectral_attack_by_frame(torch.nn.Module):
         p_covariances = p_means_squared - p_m2
         q_covariances = q_means_squared - q_m2
 
+        # If no phone, make covariance matrix identity
+        p_covariances_shifted = p_covariances - torch.eye(13)
+        q_covariances_shifted = q_covariances - torch.eye(13)
 
-        return p_means, p_covariances, q_means, q_covariances
+        p_covariances_shifted_masked = p_covariances_shifted * num_phones_mask.unsqueeze(dim=2).repeat(1,1,13).unsqueeze(dim=3).repeat(1,1,1,13)
+        q_covariances_shifted_masked = q_covariances_shifted * num_phones_mask.unsqueeze(dim=2).repeat(1,1,13).unsqueeze(dim=3).repeat(1,1,1,13)
+
+        p_covs = p_covariances_shifted_masked + torch.eye(13)
+        q_covs = q_covariances_shifted_masked + torch.eye(13)
+
+        return p_means, p_covs, q_means, q_covs
 
 
     def forward(self, p_vects, q_vects, p_frames_mask, q_frames_mask, num_phones_mask):
@@ -108,8 +117,8 @@ class Spectral_attack_by_frame(torch.nn.Module):
         p_means, p_covariances, q_means, q_covariances = self.get_pq_means_covs(p_vects_masked, q_vects_masked, p_frames_mask, q_frames_mask, num_phones_mask)
 
         # add small noise to all covariance matrices to ensure they are non-singular
-        p_covariances_noised = p_covariances + (1e-2*torch.eye(13))
-        q_covariances_noised = q_covariances + (1e-2*torch.eye(13))
+        p_covariances_noised = p_covariances + (1e-3*torch.eye(13))
+        q_covariances_noised = q_covariances + (1e-3*torch.eye(13))
 
 #        print(p_covariances_noised[0,3,:,:])
 #        print(q_covariances_noised[1,4,:,:])
@@ -130,8 +139,8 @@ class Spectral_attack_by_frame(torch.nn.Module):
         # Compute the p/q_means tensor and covariance tensor
         p_means, p_covariances, q_means, q_covariances = self.get_pq_means_covs(p_vects, q_vects, p_frames_mask, q_frames_mask, num_phones_mask)
         # add small noise to all covariance matrices to ensure they are non-singular
-        p_covariances_noised = p_covariances + (1e-2*torch.eye(13))
-        q_covariances_noised = q_covariances + (1e-2*torch.eye(13))
+        p_covariances_noised = p_covariances + (1e-3*torch.eye(13))
+        q_covariances_noised = q_covariances + (1e-3*torch.eye(13))
 
         trained_model = torch.load(self.trained_model_path)
         trained_model.eval()
