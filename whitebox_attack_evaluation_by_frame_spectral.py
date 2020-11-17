@@ -131,7 +131,7 @@ attack_model = torch.load(attack_model_path)
 attack_model.eval()
 attack = attack_model.get_noise()
 attack = attack.detach().numpy()
-
+attack = np.array([1.0000e+00, 7.6181e-02, 1.0000e+00, 1.0000e+00, 5.0850e-01, 1.3706e-03, 2.1112e-02, 8.6159e-02, 5.4362e-02, 1.0000e+00, 1.0000e+00, 3.0498e-02, 4.3693e-02, 1.0173e-02, 1.0008e-02, 1.9726e-01, 3.0916e-02, 8.6139e-01, 6.3313e-04, 9.9886e-01, 1.9224e-01, 1.2433e-01, 1.4528e-02, 9.9355e-01])
 
 # get the means and covariances split into p and q groups (for doing kl) with attack by frame in spectral space
 p_means, p_covariances, q_means, q_covariances, mask = get_pdf_attack(pkl, phones, attack)

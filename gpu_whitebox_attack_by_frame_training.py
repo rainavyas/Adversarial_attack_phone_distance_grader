@@ -7,6 +7,18 @@ import math
 import argparse
 from pkl2pqvects import get_phones, get_vects
 import pickle
+import sys
+import os
+
+# Set device
+def get_default_device():
+    if torch.cuda.is_available():
+        print("Got CUDA!")
+        return torch.device('cuda')
+    else:
+        print("No CUDA found")
+        return torch.device('cpu')
+
 
 def clip_params(model, barrier_val):
     old_params = {}
@@ -29,6 +41,16 @@ commandLineParser.add_argument('--barrier_val', default=1.0, type=float, help='l
 args = commandLineParser.parse_args()
 barrier_val = args.barrier_val
 
+
+# Save the command run
+if not os.path.isdir('CMDs'):
+    os.mkdir('CMDs')
+with open('CMDs/train.cmd', 'a') as f:
+    f.write(' '.join(sys.argv)+'\n')
+
+# set the device
+device = get_default_device()
+
 # Get all the p/q vects
 pkl_file = '/home/alta/BLTSpeaking/exp-vr313/data/mfcc13/GKTS4-D3/grader/BLXXXgrd02/BLXXXgrd02.pkl'
 pkl = pickle.load(open(pkl_file, "rb"))
@@ -45,12 +67,12 @@ y = pkl['score']
 y = np.array(y)
 
 # Convert to tensors
-p_vects = torch.from_numpy(p_vects).float()
-q_vects = torch.from_numpy(q_vects).float()
-p_mask = torch.from_numpy(p_mask).float()
-q_mask= torch.from_numpy(q_mask).float()
-mask = torch.from_numpy(mask).float()
-y = torch.from_numpy(y).float()
+p_vects = torch.from_numpy(p_vects).float().to(device)
+q_vects = torch.from_numpy(q_vects).float().to(device)
+p_mask = torch.from_numpy(p_mask).float().to(device)
+q_mask= torch.from_numpy(q_mask).float().to(device)
+mask = torch.from_numpy(mask).float().to(device)
+y = torch.from_numpy(y).float().to(device)
 
 # Define constants
 lr = 5*1e-1
@@ -73,7 +95,7 @@ train_ds = TensorDataset(p_vects, q_vects, p_mask, q_mask, mask)
 # Use DataLoader to handle minibatches easily
 train_dl = DataLoader(train_ds, batch_size = bs, shuffle = True)
 
-attack_model = Spectral_attack_by_frame(spectral_dim, mfcc_dim, trained_model_path, init_root)
+attack_model = Spectral_attack_by_frame(spectral_dim, mfcc_dim, trained_model_path, init_root).to(device)
 print("model initialised")
 
 optimizer = torch.optim.SGD(attack_model.parameters(), lr=lr, momentum = 0.9, nesterov=True)

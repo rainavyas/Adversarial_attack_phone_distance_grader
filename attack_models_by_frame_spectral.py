@@ -66,7 +66,7 @@ class Spectral_attack_by_frame(torch.nn.Module):
         p/q_lengths = [num_speakers X num_feats] -> stores the number of observed
                                                     frames associated
                                                     with the corresponding phone
-        p/q_frames_mask = [num_speakers X num_feats X max_num_mfcc_frames]
+        p/q_frames_mask = [num_speakers X num_feats X max_num_mfcc_frames x mfcc_dim]
                           -> The associated 0s and 1s mask of p/q_lengths
         num_phones_mask = [num_speakers X num_feats],
         with a 0 corresponding to position that should be -1 (no phones observed)
@@ -117,8 +117,8 @@ class Spectral_attack_by_frame(torch.nn.Module):
         p_means, p_covariances, q_means, q_covariances = self.get_pq_means_covs(p_vects_masked, q_vects_masked, p_frames_mask, q_frames_mask, num_phones_mask)
 
         # add small noise to all covariance matrices to ensure they are non-singular
-        p_covariances_noised = p_covariances + (1e-3*torch.eye(13))
-        q_covariances_noised = q_covariances + (1e-3*torch.eye(13))
+        p_covariances_noised = p_covariances + (1e-2*torch.eye(13))
+        q_covariances_noised = q_covariances + (1e-2*torch.eye(13))
 
 #        print(p_covariances_noised[0,3,:,:])
 #        print(q_covariances_noised[1,4,:,:])
@@ -139,8 +139,8 @@ class Spectral_attack_by_frame(torch.nn.Module):
         # Compute the p/q_means tensor and covariance tensor
         p_means, p_covariances, q_means, q_covariances = self.get_pq_means_covs(p_vects, q_vects, p_frames_mask, q_frames_mask, num_phones_mask)
         # add small noise to all covariance matrices to ensure they are non-singular
-        p_covariances_noised = p_covariances + (1e-3*torch.eye(13))
-        q_covariances_noised = q_covariances + (1e-3*torch.eye(13))
+        p_covariances_noised = p_covariances + (1e-2*torch.eye(13))
+        q_covariances_noised = q_covariances + (1e-2*torch.eye(13))
 
         trained_model = torch.load(self.trained_model_path)
         trained_model.eval()
