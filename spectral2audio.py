@@ -64,9 +64,10 @@ def spectral2audio(spectral_vals, output_file):
     # Convert to normal frequency positions
     filters_f = [mel2f(mel) for mel in filters_mel]
 
-    # Create list of the frequencies for dft -> only want half the samples + 1
-    # for now, as only going up to half the sampling frequency
-    dft_f_pos = np.linspace(LOW_FREQ, HIGH_FREQ, (DFT_SIZE/2)+1).tolist()
+    # Create list of the frequencies for dft
+    dft_f_pos = np.linspace(LOW_FREQ, SAMPLING_FREQ, DFT_SIZE).tolist()
+    # Keep only the first half for now (the posotive associated freq)-> second half (negative associated freq) will be used for symmetry to ensure x(t) is real valued
+    dft_f_pos = dft_f_pos[:int(FRAME_SIZE/2)+1]
 
     # Create dictionary of closest frequency to relevant spectral values
     f2spectral_val = {}
@@ -83,25 +84,26 @@ def spectral2audio(spectral_vals, output_file):
         else:
             power = 0
         powers.append(power)
+     
 
     # Convert power signal to a Fourier signal
-    fourier_vals = [math.sqrt((FRAME_SIZE)*p for p in powers)]
+    fourier_vals = [math.sqrt(FRAME_SIZE*p) for p in powers]
 
     # The DFT values have only been defined from frequencies 0Hz to 8kHz
     # We need it defined from -8kHz to 8kHz, which in the DFT requires
     # values to be defined from 0kHz to 16kHz (periodicity of DTFT)
     # For real valued in time systems the spectrum should be symmetric.
-    fourier_vals_reverse = fourier_vals[:-1].reverse()
+    fourier_vals_reverse = list(reversed(fourier_vals[1:]))
     full_dft_vals = fourier_vals + fourier_vals_reverse
     full_dft_vals = np.array(full_dft_vals)
 
     # Perform the inverse DFT (use a FFT)
-    frame = np.fft.ifft(full_dft_vals)
+    frame = np.absolute(np.fft.ifft(full_dft_vals))
     print("Frame values, sampled at Hz", SAMPLING_FREQ)
     print(frame)
 
     # The current frame is very short, so it is useful for hearing purposes to loop it
-    num_loops = 400
+    num_loops = 4000
     frames_repeated = np.tile(frame, num_loops)
 
     # Convert the signal to an actual audio file
