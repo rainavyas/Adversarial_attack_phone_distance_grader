@@ -16,7 +16,8 @@ SPECTRAL_SIZE = 24
 HIGH_FREQ = SAMPLING_FREQ/2
 LOW_FREQ = 0
 
-spectral_vals_if_no_model = [1.0000e+00, 7.6181e-02, 1.0000e+00, 1.0000e+00, 5.0850e-01, 1.3706e-03, 2.1112e-02, 8.6159e-02, 5.4362e-02, 1.0000e+00, 1.0000e+00, 3.0498e-02, 4.3693e-02, 1.0173e-02, 1.0008e-02, 1.9726e-01, 3.0916e-02, 8.6139e-01, 6.3313e-04, 9.9886e-01, 1.9224e-01, 1.2433e-01, 1.4528e-02, 9.9355e-01]
+#spectral_vals_if_no_model = [1.0000e+00, 7.6181e-02, 1.0000e+00, 1.0000e+00, 5.0850e-01, 1.3706e-03, 2.1112e-02, 8.6159e-02, 5.4362e-02, 1.0000e+00, 1.0000e+00, 3.0498e-02, 4.3693e-02, 1.0173e-02, 1.0008e-02, 1.9726e-01, 3.0916e-02, 8.6139e-01, 6.3313e-04, 9.9886e-01, 1.9224e-01, 1.2433e-01, 1.4528e-02, 9.9355e-01]
+spectral_vals_if_no_model = [1000]*24
 
 def f2mel(f):
     '''
@@ -98,7 +99,7 @@ def spectral2audio(spectral_vals, output_file):
     full_dft_vals = np.array(full_dft_vals)
 
     # Perform the inverse DFT (use a FFT)
-    frame = np.absolute(np.fft.ifft(full_dft_vals))
+    frame = np.fft.ifft(full_dft_vals).real
     print("Frame values, sampled at Hz", SAMPLING_FREQ)
     print(frame)
 
@@ -107,7 +108,7 @@ def spectral2audio(spectral_vals, output_file):
     frames_repeated = np.tile(frame, num_loops)
 
     # Convert the signal to an actual audio file
-    write(output_file, SAMPLING_FREQ, frames_repeated)
+    write(output_file, SAMPLING_FREQ, frames_repeated.astype(np.dtype('i2')))
 
 # Get command line arguments
 commandLineParser = argparse.ArgumentParser()

@@ -67,17 +67,17 @@ y = pkl['score']
 y = np.array(y)
 
 # Convert to tensors
-p_vects = torch.from_numpy(p_vects).float().to(device)
-q_vects = torch.from_numpy(q_vects).float().to(device)
-p_mask = torch.from_numpy(p_mask).float().to(device)
-q_mask= torch.from_numpy(q_mask).float().to(device)
-mask = torch.from_numpy(mask).float().to(device)
-y = torch.from_numpy(y).float().to(device)
+p_vects = torch.from_numpy(p_vects).float()
+q_vects = torch.from_numpy(q_vects).float()
+p_mask = torch.from_numpy(p_mask).float()
+q_mask= torch.from_numpy(q_mask).float()
+mask = torch.from_numpy(mask).float()
+y = torch.from_numpy(y).float()
 
 # Define constants
 lr = 5*1e-1
 epochs = 50
-bs = 10
+bs = 5
 seed = 1
 torch.manual_seed(seed)
 trained_model_path = "FCC_lpron_seed1.pt"
@@ -85,9 +85,9 @@ spectral_dim = 24
 mfcc_dim = 13
 sch = 0.985
 
-init_root = torch.FloatTensor([-2]*spectral_dim)
+init_root = torch.FloatTensor([-2]*spectral_dim).to(device)
 barrier_val = barrier_val
-barriers = torch.FloatTensor([barrier_val]*spectral_dim)
+#barriers = torch.FloatTensor([barrier_val]*spectral_dim)
 
 # Store all training dataset in a single wrapped tensor
 train_ds = TensorDataset(p_vects, q_vects, p_mask, q_mask, mask)
@@ -104,10 +104,17 @@ optimizer = torch.optim.SGD(attack_model.parameters(), lr=lr, momentum = 0.9, ne
 # Every step size number of epochs, lr = lr * gamma
 scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size = 1, gamma = sch)
 
+ 
 for epoch in range(epochs):
     attack_model.train()
     combined_loss = 0
     for p, q, pm, qm, m in train_dl:
+
+        p = p.to(device)
+        q = q.to(device)
+        pm = pm.to(device)
+        qm = qm.to(device)
+        m = m.to(device)
 
         # Forward pass
         y_pred = attack_model(p, q, pm, qm, m)
