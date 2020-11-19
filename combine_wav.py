@@ -15,10 +15,18 @@ first = args.first
 second = args.second
 
 f1, x = read(first)
-f2, y = read(first)
+f2, y = read(second)
 
 print(f1)
 print(f2)
+
+l1 = len(x)
+l2 = len(y)
+
+if l1>l2:
+    x = x[:l2]
+else:
+    y = y[:l1]
 
 z = x + y
 out = first[:-4]+'_and_'+second
