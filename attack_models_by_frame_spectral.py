@@ -48,14 +48,14 @@ class Spectral_attack_by_frame(torch.nn.Module):
         q_covariances = q_means_squared - q_m2
 
         # If no phone, make covariance matrix identity
-        p_covariances_shifted = p_covariances - torch.eye(13)
-        q_covariances_shifted = q_covariances - torch.eye(13)
+        p_covariances_shifted = p_covariances - torch.eye(13).to(self.device)
+        q_covariances_shifted = q_covariances - torch.eye(13).to(self.device)
 
         p_covariances_shifted_masked = p_covariances_shifted * num_phones_mask.unsqueeze(dim=2).repeat(1,1,13).unsqueeze(dim=3).repeat(1,1,1,13)
         q_covariances_shifted_masked = q_covariances_shifted * num_phones_mask.unsqueeze(dim=2).repeat(1,1,13).unsqueeze(dim=3).repeat(1,1,1,13)
 
-        p_covs = p_covariances_shifted_masked + torch.eye(13)
-        q_covs = q_covariances_shifted_masked + torch.eye(13)
+        p_covs = p_covariances_shifted_masked + torch.eye(13).to(self.device)
+        q_covs = q_covariances_shifted_masked + torch.eye(13).to(self.device)
 
         return p_means, p_covs, q_means, q_covs
 
@@ -81,7 +81,7 @@ class Spectral_attack_by_frame(torch.nn.Module):
 
         # Need to add spectral noise
         # Pad to spectral dimension
-        padding = torch.zeros(p_vects.size(0), p_vects.size(1), p_vects.size(2), self.spectral_dim - self.mfcc_dim)
+        padding = torch.zeros(p_vects.size(0), p_vects.size(1), p_vects.size(2), self.spectral_dim - self.mfcc_dim).to(self.device)
         padded_p_vects = torch.cat((p_vects, padding), 3)
         padded_q_vects = torch.cat((q_vects, padding), 3)
 
@@ -117,8 +117,8 @@ class Spectral_attack_by_frame(torch.nn.Module):
         p_means, p_covariances, q_means, q_covariances = self.get_pq_means_covs(p_vects_masked, q_vects_masked, p_frames_mask, q_frames_mask, num_phones_mask)
 
         # add small noise to all covariance matrices to ensure they are non-singular
-        p_covariances_noised = p_covariances + (1e-2*torch.eye(13))
-        q_covariances_noised = q_covariances + (1e-2*torch.eye(13))
+        p_covariances_noised = p_covariances + (1e-2*torch.eye(13).to(self.device))
+        q_covariances_noised = q_covariances + (1e-2*torch.eye(13).to(self.device))
 
 #        print(p_covariances_noised[0,3,:,:])
 #        print(q_covariances_noised[1,4,:,:])
@@ -139,8 +139,8 @@ class Spectral_attack_by_frame(torch.nn.Module):
         # Compute the p/q_means tensor and covariance tensor
         p_means, p_covariances, q_means, q_covariances = self.get_pq_means_covs(p_vects, q_vects, p_frames_mask, q_frames_mask, num_phones_mask)
         # add small noise to all covariance matrices to ensure they are non-singular
-        p_covariances_noised = p_covariances + (1e-2*torch.eye(13))
-        q_covariances_noised = q_covariances + (1e-2*torch.eye(13))
+        p_covariances_noised = p_covariances + (1e-2*torch.eye(13).to(self.device))
+        q_covariances_noised = q_covariances + (1e-2*torch.eye(13).to(self.device))
 
         trained_model = torch.load(self.trained_model_path)
         trained_model.eval()
@@ -151,3 +151,8 @@ class Spectral_attack_by_frame(torch.nn.Module):
         return the spectral noise vector
         '''
         return torch.exp(self.noise_root)
+
+    def to(self, device):
+        super(Spectral_attack_by_frame, self).to(device)
+        self.device = device
+

@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import pickle
 import numpy as np
+import torch
+import torch_dct as dct
 
 
 def get_phones(alphabet='arpabet'):
@@ -77,10 +79,11 @@ ind = np.arange(num_channels)
 width = 1
 x = [str(i) for i in range(num_channels)]
 plt.bar(ind, channel_means, width, color='blue', yerr=channel_stds, label='Spectral Vectors Mean')
-plt.xticks(ind+width/2, x)
+plt.xticks(ind, x)
 plt.xlabel("Spectrum Channel")
 plt.ylabel("Spectral Energy")
-plt.title("BLXXXgrd02 Data: average over all speakers and phones in spectral space")
+plt.title("BLXXXgrd02 Data")
+plt.ylim([0,250])
 
 # Save the figure as an image
 plt.tight_layout()
