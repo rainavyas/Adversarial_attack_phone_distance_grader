@@ -46,9 +46,12 @@ class Spectral_attack_lognormal(torch.nn.Module):
         step2 = torch.transpose(dct.idct(torch.transpose(step1, -1, -2)), -1, -2)
         step3 = torch.diagonal(step2, offset=0, dim1=-2, dim2=-1)
         step4 = dct.idct(means) + (step3*0.5)
-        step5 = torch.exp(step4) + noise
+        padding = torch.zeros(means.size(0), means.size(1), self.spectral_dim - self.mfcc_dim).to(self.device)
+        padded_step4 = torch.cat((step4, padding), 2)
+        step5 = torch.exp(padded_step4) + noise
         step6 = torch.log(step5)*2
-        step7 = step6 - (2*means_atck)
+        step6_trunc = torch.narrow(step6, 2, 0, self.mfcc_dim)
+        step7 = step6_trunc - (2*means_atck)
         step8 = torch.diag_embed(step7)
 
         stepa = torch.diag_embed(step3)
