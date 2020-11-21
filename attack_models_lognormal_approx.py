@@ -94,7 +94,7 @@ class Spectral_attack_lognormal(torch.nn.Module):
         y = trained_model(p_means_attacked, p_covs_attacked, q_means_attacked, q_covs_attacked, num_phones_mask)
 
 
-        return y
+        return y.clamp(min=0.0, max=6.0)
 
     def get_preds_no_noise(self, p_means, p_covariances, q_means, q_covariances, num_phones_mask):
         '''
