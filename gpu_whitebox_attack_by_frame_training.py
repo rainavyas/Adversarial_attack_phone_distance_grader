@@ -85,7 +85,7 @@ spectral_dim = 24
 mfcc_dim = 13
 sch = 0.985
 
-init_root = torch.FloatTensor([-2]*spectral_dim).to(device)
+init_root = torch.FloatTensor([-2]*spectral_dim)
 barrier_val = barrier_val
 #barriers = torch.FloatTensor([barrier_val]*spectral_dim)
 
@@ -95,7 +95,8 @@ train_ds = TensorDataset(p_vects, q_vects, p_mask, q_mask, mask)
 # Use DataLoader to handle minibatches easily
 train_dl = DataLoader(train_ds, batch_size = bs, shuffle = True)
 
-attack_model = Spectral_attack_by_frame(spectral_dim, mfcc_dim, trained_model_path, init_root).to(device)
+attack_model = Spectral_attack_by_frame(spectral_dim, mfcc_dim, trained_model_path, init_root)
+attack_model.to(device)
 print("model initialised")
 
 optimizer = torch.optim.SGD(attack_model.parameters(), lr=lr, momentum = 0.9, nesterov=True)
