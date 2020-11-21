@@ -43,7 +43,7 @@ class Spectral_attack_lognormal(torch.nn.Module):
         approximation of a shifted log normal distribution
         '''
         step1 = dct.idct(covs)
-        step2 = torch.transpose(dct.idct(torch.transpose(step1, -1, -2)))
+        step2 = torch.transpose(dct.idct(torch.transpose(step1, -1, -2)), -1, -2)
         step3 = torch.diagonal(step2, offset=0, dim1=-2, dim2=-1)
         step4 = dct.idct(means) + (step3*0.5)
         step5 = torch.exp(step4) + noise
@@ -56,7 +56,7 @@ class Spectral_attack_lognormal(torch.nn.Module):
 
         combine1 = stepb - torch.clamp(step8) # clamp to ensure cov diagonals are +ve
         combine2 = dct.dct(combine1)
-        combine3 = torch.transpose(dct.dct(torch.transpose(combine2, -1, -2)))
+        combine3 = torch.transpose(dct.dct(torch.transpose(combine2, -1, -2)), -1, -2)
 
         attacked_covs = covs - combine3
         return attacked_covs
