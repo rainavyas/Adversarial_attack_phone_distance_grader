@@ -53,20 +53,14 @@ class Spectral_attack_lognormal(torch.nn.Module):
         step6_trunc = torch.narrow(step6, 2, 0, self.mfcc_dim)
         step7 = step6_trunc - (2*dct.idct(means_atck))
         step8 = torch.diag_embed(step7)
+        step9 = dct.dct(step8)
+        step10 = torch.transpose(dct.dct(torch.transpose(step9, -1, -2)), -1, -2)
 
-        stepa = torch.diag_embed(step3)
-        stepb = stepa * torch.eye(13).to(self.device)
+        stepa = torch.diagonal(covs, offset=0, dim1=-2, dim2=-1)
+        stepb = torch.diag_embed(stepa)
 
-        combine1 = stepb - torch.clamp(step8, min=1) # clamp to ensure cov diagonals are +ve
-        combine2 = dct.dct(combine1)
-        combine3 = torch.transpose(dct.dct(torch.transpose(combine2, -1, -2)), -1, -2)
-
-        attacked_covs = covs - combine3
-
-        temp = attacked_covs[0,0,:,:]
-        print(temp)
-
-        noised = attacked_covs + (1e-1*torch.eye(13).to(self.device))
+        attacked_covs = covs - stepb + torch.clamp(step10, min=0.1)
+        noised = attacked_covs + (1e-3*torch.eye(13).to(self.device))
 
         return noised
 
