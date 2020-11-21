@@ -82,7 +82,7 @@ spectral_dim = 24
 mfcc_dim = 13
 sch = 0.985
 
-init_root = torch.FloatTensor([-1]*spectral_dim)
+init_root = torch.FloatTensor([-4]*spectral_dim)
 
 # Store all training dataset in a single wrapped tensor
 train_ds = TensorDataset(p_means, p_covariances, q_means, q_covariances, mask)

@@ -56,11 +56,15 @@ class Spectral_attack_lognormal(torch.nn.Module):
         step9 = dct.dct(step8)
         step10 = torch.transpose(dct.dct(torch.transpose(step9, -1, -2)), -1, -2)
 
+        # Make sure no negative diagonal values
+        step11 = torch.diag_embed(torch.clamp(torch.diagonal(step10, offset=0, dim1=-2, dim2=-1), min=1.0))
+
         stepa = torch.diagonal(covs, offset=0, dim1=-2, dim2=-1)
         stepb = torch.diag_embed(stepa)
 
-        attacked_covs = covs - stepb + torch.clamp(step10, min=0.1)
-        noised = attacked_covs + (1e-3*torch.eye(13).to(self.device))
+        #attacked_covs = covs - stepb + step11
+        attacked_covs = step11 # Have to neglect off-diagonal terms to ensure covariance matrices are positive definite
+        noised = attacked_covs + (1e-2*torch.eye(13).to(self.device))
 
         return noised
 
@@ -88,6 +92,7 @@ class Spectral_attack_lognormal(torch.nn.Module):
         trained_model = torch.load(self.trained_model_path)
         trained_model.eval()
         y = trained_model(p_means_attacked, p_covs_attacked, q_means_attacked, q_covs_attacked, num_phones_mask)
+
 
         return y
 
