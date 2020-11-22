@@ -52,7 +52,7 @@ def spectral_attack(X, attack):
 def get_pdf_attack(obj, phones, attack):
     n = len(obj['plp'][0][0][0][0][0]) # dimension of mfcc vector
     num_spk = len(obj['plp'])
-    num_spk = 20
+    num_spk = 50
 
     # Define the tensors required by spectral attack model
     p_means = np.zeros((num_spk, int((len(phones)-1)*(len(phones)-2)*0.5) , n))
@@ -115,8 +115,8 @@ args = commandLineParser.parse_args()
 barrier_val = args.barrier_val
 
 
-pkl_file = '/home/alta/BLTSpeaking/exp-vr313/data/mfcc13/GKTS4-D3/grader/BLXXXgrd02/BLXXXgrd02.pkl'
-#pkl_file = '/home/alta/BLTSpeaking/exp-vr313/data/mfcc13/GKTS4-D3/grader/BLXXXeval3/BLXXXeval3.pkl'
+#pkl_file = '/home/alta/BLTSpeaking/exp-vr313/data/mfcc13/GKTS4-D3/grader/BLXXXgrd02/BLXXXgrd02.pkl'
+pkl_file = '/home/alta/BLTSpeaking/exp-vr313/data/mfcc13/GKTS4-D3/grader/BLXXXeval3/BLXXXeval3.pkl'
 pkl = pickle.load(open(pkl_file, "rb"))
 
 print("loaded pkl")
@@ -135,7 +135,8 @@ attack = attack.detach().numpy()
 
 #attack = np.array([1.0, 0.0966, 1.0, 0.7846, 0.3997, 0.0040, 0.1374, 0.1373, 0.0979, 1.0000, 1.0000, 0.0597, 0.0812, 0.0080, 0.0142, 0.2040, 0.0577, 0.1652, 0.0011, 0.8029, 0.2753, 0.0834, 0.0127, 1.0000])
 #attack = np.array([0.5239, 0.1329, 1.0000, 0.4248, 0.3545, 0.1186, 0.2915, 0.2734, 0.2552, 0.3720, 1.0000, 0.2049, 0.2153, 0.0603, 0.1125, 0.2792, 0.1817, 0.1935, 0.0463, 0.4211, 0.3960, 0.0895, 0.1215, 0.529])
-attack = np.array([1.0000e+00, 7.6181e-02, 1.0000e+00, 1.0000e+00, 5.0850e-01, 1.3706e-03, 2.1112e-02, 8.6159e-02, 5.4362e-02, 1.0000e+00, 1.0000e+00, 3.0498e-02, 4.3693e-02, 1.0173e-02, 1.0008e-02, 1.9726e-01, 3.0916e-02, 8.6139e-01, 6.3313e-04, 9.9886e-01, 1.9224e-01, 1.2433e-01, 1.4528e-02, 9.9355e-01])
+#attack = np.array([0.0506, 0.0454, 0.0447, 0.0499, 0.0497, 0.0500, 0.0492, 0.0495, 0.0496, 0.0485, 0.0470, 0.0495, 0.0494, 0.0470, 0.0485, 0.0497, 0.0497, 0.0479, 0.0483, 0.0494, 0.0492, 0.0486, 0.0488, 0.0497])
+attack = np.array([0.2168, 0.0009, 0.0010, 0.0540, 0.0483, 0.0449, 0.0111, 0.0345, 0.0334, 0.0048, 0.0032, 0.0357, 0.0321, 0.0024, 0.0053, 0.0375, 0.0368, 0.0025, 0.0040, 0.0335, 0.0341, 0.0037, 0.0023, 0.0547])
 
 # get the means and covariances split into p and q groups (for doing kl) with attack by frame in spectral space
 p_means, p_covariances, q_means, q_covariances, mask = get_pdf_attack(pkl, phones, attack)
@@ -143,7 +144,7 @@ p_means, p_covariances, q_means, q_covariances, mask = get_pdf_attack(pkl, phone
 # get output labels
 y = (pkl['score'])
 y = np.array(y)
-y = y[:20] # temp
+y = y[:50] # temp
 
 
 # convert to tensors
@@ -199,12 +200,12 @@ print("Attacked average grade: ", attack_avg_grade)
 input_file = 'BLXXXgrd02_means_covs.npz'
 #input_file = 'BLXXXeval3_means_covs.npz'
 npzfile = np.load(input_file)
-p_means = npzfile['arr_0'][:20]
-p_covariances = npzfile['arr_1'][:20]
-q_means = npzfile['arr_2'][:20]
-q_covariances = npzfile['arr_3'][:20]
-mask = npzfile['arr_4'][:20]
-y = npzfile['arr_5'][:20]
+p_means = npzfile['arr_0'][:50]
+p_covariances = npzfile['arr_1'][:50]
+q_means = npzfile['arr_2'][:50]
+q_covariances = npzfile['arr_3'][:50]
+mask = npzfile['arr_4'][:50]
+y = npzfile['arr_5'][:50]
 
 # convert to tensors
 p_means = torch.from_numpy(p_means).float()
@@ -224,7 +225,7 @@ y_pred = model(p_means, p_covariances, q_means, q_covariances, mask)
 y_pred[y_pred>6]=6.0
 y_pred[y_pred<0]=0.0
 y_pred_list = y_pred.tolist()
-attack_avg_grade = torch.mean(y_pred)
+no_attack_avg_grade = torch.mean(y_pred)
 
-print("Not attacked average grade: ", attack_avg_grade)
+print("Not attacked average grade: ", no_attack_avg_grade)
 

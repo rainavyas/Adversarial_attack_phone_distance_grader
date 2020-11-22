@@ -36,7 +36,8 @@ print("loaded pkl")
 # get the phones
 phones = get_phones()
 max_len_frames = 4000
-p_vects, q_vects, p_mask, q_mask, mask = get_vects(pkl, phones, max_len_frames)
+spk = 60
+p_vects, q_vects, p_mask, q_mask, mask = get_vects(pkl, phones, max_len_frames, spk)
 
 num_spk = len(p_vects)
 
@@ -102,10 +103,13 @@ for epoch in range(epochs):
         clip_params(attack_model, barrier_val)
 
         combined_loss+=loss.item()
+        
+        attack_avg_grade = torch.mean(y_pred)
+      
 
     #print("loss: ", loss.item())
-    avg = -1*combined_loss/num_spk
-    print("Avg Grade: ")
+    #avg = -1*combined_loss/num_spk
+    #print("Avg Grade: ")
     # Check average grade prediction
     #attack_model.eval()
     #y_pred_no_attack = attack_model.get_preds_no_noise(p_vects, q_vects, p_mask, q_mask, mask)
@@ -113,13 +117,13 @@ for epoch in range(epochs):
     #y_pred_attack = attack_model(p_vects, q_vects, p_mask, q_mask, mask)
     #attack_avg_grade = torch.mean(y_pred_attack)
     print("epoch", epoch)
-    print("On validation")
+    #print("On validation")
     #print("No attack average grade: ", no_attack_avg_grade)
-    print("Attacked average grade: ", attack_avg_grade)
+    #print("Attacked average grade: ", attack_avg_grade)
 
-    # get the noise
-    noise = attack_model.get_noise()
-    print("Spectral noise is currently: ", noise)
+        # get the noise
+        noise = attack_model.get_noise()
+        print("Spectral noise is currently: ", noise)
 
     scheduler.step()
 

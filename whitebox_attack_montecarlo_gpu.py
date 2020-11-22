@@ -11,8 +11,8 @@ import os
 # Set device
 def get_default_device():
     if torch.cuda.is_available():
-        print("Got CUDA! But will still use cpu for this script")
-        return torch.device('cpu')
+        print("Got CUDA!")
+        return torch.device('cuda')
     else:
         print("No CUDA found")
         return torch.device('cpu')
@@ -72,8 +72,8 @@ p_covariances = p_covariances + (1e-3*torch.eye(13))
 q_covariances = q_covariances + (1e-3*torch.eye(13))
 
 # Define constants
-lr = 5*1e-1
-epochs = 1
+lr = 5*1e-2
+epochs = 30
 bs = 20
 seed = 1
 torch.manual_seed(seed)
@@ -81,9 +81,9 @@ trained_model_path = "FCC_lpron_seed1.pt"
 spectral_dim = 24
 mfcc_dim = 13
 sch = 0.985
-sample_size = 2000
+sample_size = 100
 
-init_root = torch.FloatTensor([-3]*spectral_dim)
+init_root = torch.FloatTensor([-6]*spectral_dim)
 
 # Store all training dataset in a single wrapped tensor
 train_ds = TensorDataset(p_means, p_covariances, q_means, q_covariances, mask)
@@ -104,9 +104,8 @@ scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size = 1, gamma = sc
 
 for epoch in range(epochs):
     attack_model.train()
-    total = 0
     for pm, pc, qm, qc, m in train_dl:
-        attack_model.train()
+
         pm = pm.to(device)
         pc = pc.to(device)
         qm = qm.to(device)
@@ -115,7 +114,7 @@ for epoch in range(epochs):
 
         # Forward pass
         y_pred = attack_model(pm, pc, qm, qc, m)
-        print("attack aveg grade: ", torch.mean(y_pred))
+
         # Compute loss
         loss = -1*torch.sum(y_pred)
 
@@ -128,27 +127,16 @@ for epoch in range(epochs):
         clip_params(attack_model, barrier_val)
 
         print("loss: ", loss.item())
-        total+= loss.item()
-
-        attack_model.eval()
-        noise = attack_model.get_noise()
-        print("Spectral noise is currently: ", noise)
-
-        y_pred_no_attack = attack_model.get_preds_no_noise(pm, pc, qm, qc, m)
-        no_attack_avg_grade = torch.mean(y_pred_no_attack)
-        print("No attack avg grade: ", no_attack_avg_grade)
-
     # Check average grade prediction
     attack_model.eval()
     y_pred_no_attack = attack_model.get_preds_no_noise(p_means, p_covariances, q_means, q_covariances, mask)
     no_attack_avg_grade = torch.mean(y_pred_no_attack)
-    #y_pred_attack = attack_model(p_means, p_covariances, q_means, q_covariances, mask)
-    #attack_avg_grade = torch.mean(y_pred_attack)
-    #attack_avg_grade = (-1 * total)/y.size(0)
-    #print("epoch", epoch)
-    #print("On validation")
-    #print("No attack average grade: ", no_attack_avg_grade)
-    #print("Attacked average grade: ", attack_avg_grade)
+    y_pred_attack = attack_model(p_means, p_covariances, q_means, q_covariances, mask)
+    attack_avg_grade = torch.mean(y_pred_attack)
+    print("epoch", epoch)
+    print("On validation")
+    print("No attack average grade: ", no_attack_avg_grade)
+    print("Attacked average grade: ", attack_avg_grade)
 
     # get the noise
     noise = attack_model.get_noise()

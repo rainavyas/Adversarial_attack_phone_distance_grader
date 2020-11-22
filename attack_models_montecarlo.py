@@ -21,8 +21,7 @@ class Spectral_attack_montecarlo(torch.nn.Module):
         Perform attack in the spectral space
         '''
         # Pad to spectral dimension
-        padding = torch.zeros(samples.size(0), samples.size(1), samples.size(2), self.spectral_dim - self.mfcc_dim)
-        padding.to(self.device)
+        padding = torch.zeros(samples.size(0), samples.size(1), samples.size(2), self.spectral_dim - self.mfcc_dim).to(self.device)
         padded_samples = torch.cat((samples, padding), 3)
 
         # Apply inverse dct
@@ -45,7 +44,7 @@ class Spectral_attack_montecarlo(torch.nn.Module):
 
         return samples_attacked
 
-    def compute_mean_cov(vects):
+    def compute_mean_cov(self, vects):
         '''
         Return the mean and covariance matrices
         '''
@@ -63,7 +62,11 @@ class Spectral_attack_montecarlo(torch.nn.Module):
 
         cov = vects_squared_mean - means_squared
 
-        return mean, cov
+	# Make cov matrix diagonal to guarantee it is positive definite
+        cov_diag = torch.diag_embed(torch.diagonal(cov, offset=0, dim1=-2, dim2=-1))
+
+        #return mean, cov_diag
+        return mean,  cov
 
     def forward(self, p_means, p_covariances, q_means, q_covariances, num_phones_mask):
         '''
@@ -80,11 +83,11 @@ class Spectral_attack_montecarlo(torch.nn.Module):
         q = torch.distributions.MultivariateNormal(q_means, q_covariances)
 
         # Sample from the distributions
-        p_samples = p.sample((self.sample_size,))
-        q_sample = q.sample((self.sample_size,))
+        p_samples = p.sample((self.sample_size,)).to(self.device)
+        q_samples = q.sample((self.sample_size,)).to(self.device)
 
-        ps = torch.reshape(p_samples, (p_samples.size(1), p_samples.size(2), p_samples.size(0), p_samples.size(3))
-        qs = torch.reshape(q_samples, (q_samples.size(1), q_samples.size(2), q_samples.size(0), q_samples.size(3))
+        ps = torch.reshape(p_samples, (p_samples.size(1), p_samples.size(2), p_samples.size(0), p_samples.size(3)))
+        qs = torch.reshape(q_samples, (q_samples.size(1), q_samples.size(2), q_samples.size(0), q_samples.size(3)))
 
         # Spectral attack the samples
         noise = torch.exp(self.noise_root)
@@ -99,10 +102,17 @@ class Spectral_attack_montecarlo(torch.nn.Module):
         p_covariances_noised = p_covs_attacked + (1e-2*torch.eye(13).to(self.device))
         q_covariances_noised = q_covs_attacked + (1e-2*torch.eye(13).to(self.device))
 
+        print("Before sampling")
+        print(p_means[3,2,:])
+        print("After Sampling")
+        print(p_means_attacked[3,2,:])
+
         # Pass through trained model
         trained_model = torch.load(self.trained_model_path)
+        trained_model.to(self.device)
         trained_model.eval()
         y = trained_model(p_means_attacked, p_covariances_noised, q_means_attacked, q_covariances_noised, num_phones_mask)
+        #y = trained_model(p_means_attacked, p_covariances, q_means_attacked, q_covariances, num_phones_mask)
 
         return y.clamp(min=0.0, max=6.0)
 

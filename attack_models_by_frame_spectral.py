@@ -125,6 +125,7 @@ class Spectral_attack_by_frame(torch.nn.Module):
 
         # Pass through trained model
         trained_model = torch.load(self.trained_model_path)
+        trained_model.to(self.device)
         trained_model.eval()
         y = trained_model(p_means, p_covariances_noised, q_means, q_covariances_noised, num_phones_mask)
 

@@ -15,10 +15,8 @@ def get_phones(alphabet='arpabet'):
     raise ValueError('Alphabet name not recognised: ' + alphabet)
 
 
-def get_vects(obj, phones, max_len_frames):
+def get_vects(obj, phones, max_len_frames, num_spk):
     n = len(obj['plp'][0][0][0][0][0]) # dimension of mfcc vector
-    num_spk = len(obj['plp'])
-    num_spk = 60 #temp
 
     # Define the tensors required by spectral attack model
     p_vects = np.zeros((num_spk, int((len(phones)-1)*(len(phones)-2)*0.5) , max_len_frames, n))
@@ -38,6 +36,9 @@ def get_vects(obj, phones, max_len_frames):
                 for ph in range(len(obj['plp'][spk][utt][w])):
                     # n.b. this is iterating through the phones that occur sequentially in a word
                     for frame in range(len(obj['plp'][spk][utt][w][ph])):
+                        num_frames = N[obj['phone'][spk][utt][w][ph]]
+                        if num_frames >= max_len_frames:
+                            continue    
                         N[obj['phone'][spk][utt][w][ph]] += 1
                         X = np.array(obj['plp'][spk][utt][w][ph][frame])
                         curr_pos = N[obj['phone'][spk][utt][w][ph]] - 1
